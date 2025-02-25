@@ -1,0 +1,52 @@
+const demodata_professors = [
+    {
+      name: "Aarav Patel",
+      email: "aarav.patel@example.com",
+      password: "Aarav@123",
+      profilePicture: "https://example.com/profiles/aarav.jpg",
+      role: "Professor",
+      qualification: "Ph.D. in Computer Science",
+      status: "Active",
+      department: "Computer Science",
+      createdAt: "2023-01-10T10:00:00",
+      updatedAt: "2024-02-15T14:00:00",
+    },
+    {
+      name: "Riya Sharma",
+      email: "riya.sharma@example.com",
+      password: "Riya@123",
+      profilePicture: "https://example.com/profiles/riya.jpg",
+      role: "Assistant Professor",
+      qualification: "M.Sc. in Mathematics",
+      status: "Active",
+      department: "Mathematics",
+      createdAt: "2023-02-20T11:30:00",
+      updatedAt: "2024-03-10T16:30:00",
+    },
+    {
+      name: "Kunal Verma",
+      email: "kunal.verma@example.com",
+      password: "Kunal@123",
+      profilePicture: "https://example.com/profiles/kunal.jpg",
+      role: "Lecturer",
+      qualification: "M.A. in English Literature",
+      status: "Active",
+      department: "English",
+      createdAt: "2023-03-05T12:00:00",
+      updatedAt: "2024-04-05T18:00:00",
+    },
+    {
+      name: "Neha Kapoor",
+      email: "neha.kapoor@example.com",
+      password: "Neha@123",
+      profilePicture: "https://example.com/profiles/neha.jpg",
+      role: "Senior Lecturer",
+      qualification: "Ph.D. in Physics",
+      status: "Active",
+      department: "Physics",
+      createdAt: "2023-04-15T09:00:00",
+      updatedAt: "2024-05-20T13:00:00",
+    }
+  ];
+  
+  export default demodata_professors;

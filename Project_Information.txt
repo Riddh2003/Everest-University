@@ -1,0 +1,7 @@
+ 
+#638ba0  // background
+#345D7C
+#81ACC3 
+#BEC1C6
+#D8D4CF 
+#FAF4E8
