@@ -39,17 +39,17 @@ function Circulation() {
       <div className={`flex-1 bg-gray-100 p-6 transition-all duration-300 ${isOpenForSideBar ? 'ml-64' : 'ml-20'}`}>
         {/* Event Management Section */}
         <section id="events" className="p-6">
-          <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="bg-white border border-gray-200 rounded-lg shadow-lg">
             {/* Table Header */}
             <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <h2 className="text-lg font-semibold">Event Management</h2>
+              <h2 className="text-lg font-semibold text-blue-500">Event Management</h2>
               <div className="flex flex-col lg:flex-row gap-2 w-full sm:w-auto">
                 {/* Search Bar */}
                 <div className="relative w-full sm:w-64">
                   <input
                     type="text"
                     placeholder="Search events..."
-                    className="pl-8 pr-4 py-2 border border-gray-300 rounded w-full"
+                    className="pl-8 pr-4 py-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)} // Update search state on input change
                   />
@@ -58,12 +58,12 @@ function Circulation() {
                   </svg>
                 </div>
                 {/* Add Event Button */}
-                <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors mt-2 sm:mt-0">
+                <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors mt-2 sm:mt-0">
                   Add Event
                 </button>
                 {/* Bulk Actions Dropdown */}
                 <select
-                  className="px-4 py-2 border border-gray-300 rounded mt-2 sm:mt-0"
+                  className="px-4 py-2 border border-gray-300 rounded mt-2 sm:mt-0 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={selectedBulkAction}
                   onChange={(e) => setSelectedBulkAction(e.target.value)} // Update bulk action state
                 >
@@ -77,21 +77,21 @@ function Circulation() {
 
             {/* Filters */}
             <div className="p-4 border-b border-gray-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <select className="px-4 py-2 border border-gray-300 rounded w-full sm:w-auto">
+              <select className="px-4 py-2 border border-gray-300 rounded w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option>All Categories</option>
                 <option>Academic</option>
                 <option>Cultural</option>
                 <option>Sports</option>
                 <option>Workshop</option>
               </select>
-              <select className="px-4 py-2 border border-gray-300 rounded w-full sm:w-auto">
+              <select className="px-4 py-2 border border-gray-300 rounded w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option>All Locations</option>
                 <option>Main Hall</option>
                 <option>Auditorium</option>
                 <option>Sports Complex</option>
                 <option>Conference Room</option>
               </select>
-              <select className="px-4 py-2 border border-gray-300 rounded w-full sm:w-auto">
+              <select className="px-4 py-2 border border-gray-300 rounded w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option>All Status</option>
                 <option>Scheduled</option>
                 <option>Ongoing</option>
@@ -99,7 +99,7 @@ function Circulation() {
                 <option>Cancelled</option>
               </select>
               {/* Apply Filters Button */}
-              <button className="px-4 py-2 text-blue-600 border border-blue-600 rounded hover:bg-blue-50 w-full sm:w-auto mt-2 sm:mt-0">
+              <button className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors w-full sm:w-auto mt-2 sm:mt-0">
                 Apply Filters
               </button>
             </div>
@@ -107,18 +107,18 @@ function Circulation() {
             {/* Table of Events */}
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-blue-500 text-white">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase">
                       <input type="checkbox" className="rounded" /> {/* Checkbox for selecting events */}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Event ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Event Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Capacity</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase">Event ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase">Event Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase">Location</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase">Capacity</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -154,8 +154,8 @@ function Circulation() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex gap-2">
-                            <button className="text-blue-600 hover:text-blue-800">Edit</button>
-                            <button className="text-red-600 hover:text-red-800">Delete</button>
+                            <button className="text-blue-500 hover:text-blue-700">Edit</button>
+                            <button className="text-red-500 hover:text-red-700">Delete</button>
                           </div>
                         </td>
                       </tr>

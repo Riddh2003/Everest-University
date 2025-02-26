@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom';
 import useTheme from '../../context/NewContext'; // Import useTheme to access context for managing the sidebar state
 
-
 function AdminSideBar() {
     // Destructuring the theme context to get sidebar state and toggle function
     const { isOpenForSideBar, setIsOpenForSideBar } = useTheme();
@@ -43,9 +42,6 @@ function AdminSideBar() {
         }
     }, [screenWidth, location]);
 
-
-
-
     // Array of navigation links
     const navLinks = [
         {
@@ -56,7 +52,6 @@ function AdminSideBar() {
                     <path d="M3 9l9-7 9 7v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"></path>
                     <path d="M9 22V12h6v10"></path>
                 </svg>
-
             ),
         },
         {
@@ -83,7 +78,7 @@ function AdminSideBar() {
         },
         {
             to: '/adminportal/admissionrequest',
-            name: 'Admissons',
+            name: 'Admissions',
             icon: (
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-users">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -115,31 +110,16 @@ function AdminSideBar() {
         },
     ];
 
-
     return (
         <>
-
             {/* Sidebar */}
-            <div className={`${isOpenForSideBar ? 'w-64' : 'w-20'}   bg-[#638ba0]  text-white transition-all duration-300 ease-in-out transform fixed top-0 left-0 h-full mt-16  `}>
-                {/* Dashboard Title */}
-                <div className="flex justify-between items-center p-4">
-                    {/* <h2 className={`text-xl font-bold transition-all duration-300 ${isOpenForSideBar ? 'block' : 'hidden'}`}>
-                              Dashboard
-                            </h2> */}
-
-                    {/* Hamburger Menu Button for Small Screens */}
-                    {/* <button onClick={toggleSidebar} className="text-2xl">
-                              {isOpenForSideBar ? '←' : '☰'}
-                            </button> */}
-                </div>
-
+            <div className={`${isOpenForSideBar ? 'w-64' : 'w-20'} bg-blue-600 text-white transition-all duration-300 ease-in-out transform fixed top-0 left-0 h-full mt-16`}>
                 {/* Navigation Links */}
                 <table className="mt-8 space-y-4">
                     <tbody>
                         {navLinks.map(({ to, name, icon }) => (
                             <tr key={to}>
                                 <td>
-
                                     <Link to={to}>
                                         <td className='px-6 py-2'>
                                             {icon}
@@ -147,9 +127,8 @@ function AdminSideBar() {
                                     </Link>
                                 </td>
                                 <td>
-
                                     <Link to={to}>
-                                        <td className={`${isOpenForSideBar ? 'px-6 py-2 hover:bg-gray-700 cursor-pointer' : 'hidden'}`}>
+                                        <td className={`${isOpenForSideBar ? 'px-6 py-2 hover:bg-blue-500 cursor-pointer hover:rounded' : 'hidden'}`}>
                                             {name}
                                         </td>
                                     </Link>

@@ -6,37 +6,36 @@ import ProfessorsForm from './Forms/ProfessorsForm';
 function Professors() {
   const { isOpenForSideBar } = useTheme(); // Access the theme context
 
-    const [professors, setProfessors] = useState(demodata_professors);
-    const [isPopupOpen, setIsPopupOpen] = useState(false);
-    const [currentProfessor, setCurrentProfessor] = useState(null);
-  
-    const openPopup = (index) => {
-      setCurrentProfessor({ ...professors[index], index });
-      setIsPopupOpen(true);
-    };
-  
-    const closePopup = () => {
-      setCurrentProfessor(null);
-      setIsPopupOpen(false);
-    };
-  
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-      setCurrentProfessor({ ...currentProfessor, [name]: value });
-    };
-  
-    const handleSubmit = (e) => {
-      e.preventDefault();
-      const updatedProfessors = [...professors];
-      updatedProfessors[currentProfessor.index] = { ...currentProfessor };
-      delete updatedProfessors[currentProfessor.index].index;
-      setProfessors(updatedProfessors);
-      closePopup();
-    };  
+  const [professors, setProfessors] = useState(demodata_professors);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [currentProfessor, setCurrentProfessor] = useState(null);
+
+  const openPopup = (index) => {
+    setCurrentProfessor({ ...professors[index], index });
+    setIsPopupOpen(true);
+  };
+
+  const closePopup = () => {
+    setCurrentProfessor(null);
+    setIsPopupOpen(false);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCurrentProfessor({ ...currentProfessor, [name]: value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const updatedProfessors = [...professors];
+    updatedProfessors[currentProfessor.index] = { ...currentProfessor };
+    delete updatedProfessors[currentProfessor.index].index;
+    setProfessors(updatedProfessors);
+    closePopup();
+  };
 
   // demo data for professors
   const facultyData = demodata_professors;
-
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
@@ -44,7 +43,6 @@ function Professors() {
     role: "All Roles",
     status: "All Status",
   });
-
 
   const filteredFaculty = facultyData.filter((faculty) => {
     const matchesSearch = faculty.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -56,19 +54,19 @@ function Professors() {
   });
 
   return (
-    <div className={`flex-1 bg-gray-100 p-6 transition-all duration-300 ${isOpenForSideBar ? 'ml-64' : 'ml-20'}`}>
+    <div className={`flex-1 bg-gray-100 p-2 transition-all duration-300 ${isOpenForSideBar ? 'ml-64' : 'ml-20'}`}>
       <section id="faculty" className="p-6">
-        <div className="bg-white border border-gray-200 rounded-lg">
+        <div className="bg-white border border-gray-200 rounded-lg shadow-lg">
 
           {/* Table Header */}
           <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 className="text-lg font-semibold">Faculty Records</h2>
+            <h2 className="text-lg font-semibold text-blue-500">Faculty Records</h2>
             <div className="flex flex-col lg:flex-row gap-2 w-full sm:w-auto">
               <div className="relative w-full sm:w-64">
                 <input
                   type="text"
                   placeholder="Search faculty..."
-                  className="pl-8 pr-4 py-2 border border-gray-300 rounded w-full"
+                  className="pl-8 pr-4 py-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -86,11 +84,11 @@ function Professors() {
                   />
                 </svg>
               </div>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+              <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
                 Add Faculty
               </button>
               <select
-                className="px-4 py-2 border border-gray-300 rounded"
+                className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 onChange={(e) => console.log(e.target.value)}
               >
                 <option>Bulk Actions</option>
@@ -104,7 +102,7 @@ function Professors() {
           {/* Filters */}
           <div className="p-4 border-b border-gray-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <select
-              className="px-4 py-2 border border-gray-300 rounded"
+              className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={filters.department}
               onChange={(e) => setFilters({ ...filters, department: e.target.value })}
             >
@@ -115,7 +113,7 @@ function Professors() {
               <option>Arts</option>
             </select>
             <select
-              className="px-4 py-2 border border-gray-300 rounded"
+              className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={filters.role}
               onChange={(e) => setFilters({ ...filters, role: e.target.value })}
             >
@@ -126,7 +124,7 @@ function Professors() {
               <option>Lecturer</option>
             </select>
             <select
-              className="px-4 py-2 border border-gray-300 rounded"
+              className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
             >
@@ -135,7 +133,7 @@ function Professors() {
               <option>On Leave</option>
               <option>Retired</option>
             </select>
-            <button className="px-4 py-2 text-blue-600 border border-blue-600 rounded hover:bg-blue-50">
+            <button className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors">
               Apply Filters
             </button>
           </div>
@@ -191,14 +189,13 @@ function Professors() {
                     <td className="px-6 py-4">{faculty.updatedAt}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
-                        <button className="text-blue-600 hover:text-blue-800" onClick={() => {openPopup(index)}}>Edit</button>
-                        <button className="text-red-600 hover:text-red-800">Delete</button>
+                        <button className="text-blue-500 hover:text-blue-700" onClick={() => { openPopup(index) }}>Edit</button>
+                        <button className="text-red-500 hover:text-red-700">Delete</button>
                       </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
-
             </table>
           </div>
 

@@ -76,15 +76,14 @@ const Student = () => {
   return (
     <ThemeProvider value={{ isOpenForSideBar }}>
       <div
-        className={`flex-1 bg-gray-100 p-6 transition-all duration-300 ${
-          isOpenForSideBar ? "ml-64" : "ml-20"
-        }`}
+        className={`flex-1 bg-gray-100 p-6 transition-all duration-300 ${isOpenForSideBar ? "ml-64" : "ml-20"
+          }`}
       >
-        <h1 className="text-3xl font-bold text-center mb-8">Students</h1>
+        <h1 className="text-3xl font-bold text-center mb-8 text-blue-500">Students</h1>
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto bg-white border-separate border border-gray-200 rounded-lg shadow-md">
             {/* Table Header */}
-            <thead className="bg-[#BCCCDC] text-gray-600">
+            <thead className="bg-blue-500 text-white">
               <tr>
                 <th className="px-4 py-2 text-left">Enrollment_ID</th>
                 <th className="px-4 py-2 text-left">Surname</th>
@@ -126,7 +125,7 @@ const Student = () => {
 
                     {/* Action Button */}
                     <td className="px-4 py-2 text-center text-nowrap">
-                      <button className="text-blue-400 hover:text-blue-950">View</button> | <button className="text-blue-400 hover:text-blue-950">Edit</button> | <button className="text-blue-400 hover:text-blue-950"> Delete</button>
+                      <button className="text-blue-500 hover:text-blue-700">View</button> | <button className="text-blue-500 hover:text-blue-700">Edit</button> | <button className="text-blue-500 hover:text-blue-700"> Delete</button>
                     </td>
                   </tr>
                 ))

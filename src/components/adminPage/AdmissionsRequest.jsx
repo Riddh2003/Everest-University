@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import useTheme, { ThemeProvider } from "../../context/NewContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -66,7 +66,7 @@ const AdmissionsRequest = () => {
       );
       if (response.status === 200) {
         if (response.data.success === false) {
-          ToastContainer.error(response.data.message, {
+          toast.error(response.data.message, {
             position: "top-center",
             autoClose: 5000,
             hideProgressBar: false,
@@ -120,17 +120,16 @@ const AdmissionsRequest = () => {
 
       <ThemeProvider value={{ isOpenForSideBar }}>
         <div
-          className={`flex-1 bg-gray-100 p-6 transition-all duration-300 ${
-            isOpenForSideBar ? "ml-64" : "ml-20"
-          }`}
+          className={`flex-1 bg-gray-100 p-6 transition-all duration-300 ${isOpenForSideBar ? "ml-64" : "ml-20"
+            }`}
         >
-          <h1 className="text-3xl font-bold text-center mb-8">
+          <h1 className="text-3xl font-bold text-center mb-8 text-blue-500">
             Admission Requests
           </h1>
           <div className="overflow-x-auto">
             <table className="min-w-full table-auto bg-white border-separate border border-gray-200 rounded-lg shadow-md">
               {/* Table Header */}
-              <thead className="bg-[#BCCCDC] text-gray-600">
+              <thead className="bg-blue-500 text-white">
                 <tr>
                   <th className="px-4 py-2 text-left">Fullname</th>
                   <th className="px-4 py-2 text-left">Email</th>
@@ -169,13 +168,13 @@ const AdmissionsRequest = () => {
                       {/* Action Button */}
                       <td className="px-4 py-2 text-center text-nowrap">
                         <button
-                          className="text-blue-400 hover:text-blue-950"
+                          className="text-blue-500 hover:text-blue-700"
                           onClick={() => handleApproveAdmission(student.email)}
                         >
                           Approve
                         </button>{" "}
                         |{" "}
-                        <button className="text-blue-400 hover:text-blue-950">
+                        <button className="text-blue-500 hover:text-blue-700">
                           Reject
                         </button>
                       </td>

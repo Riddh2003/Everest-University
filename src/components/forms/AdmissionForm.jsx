@@ -123,12 +123,12 @@ const AdmissionForm = () => {
         transition={Flip}
       />
 
-      <Container className="p-5">
+      <Container className="p-5 w-full max-w-4xl mx-auto">
         {isLoading && <Loader />}
         <Paper className="p-5 shadow-lg rounded-lg bg-white border border-[#345d7c]">
           <Typography
             variant="h4"
-            className="mb-6 text-center font-semibold text-2xl text-[#345d7c]"
+            className="text-center font-semibold text-2xl text-[#5CB338]"
           >
             Student Registration
           </Typography>
@@ -238,27 +238,27 @@ const AdmissionForm = () => {
                   Document Upload
                 </Typography>
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={6}>
                 <input
                   type="file"
                   accept="application/pdf"
                   {...register("tenthFilePath", {
                     required: "10th Marksheet is required",
                   })}
-                  className="border p-2 rounded"
+                  className="border p-2 rounded w-full"
                 />
                 <Typography variant="body2" color="error">
                   {errors.tenthFilePath?.message}
                 </Typography>
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={6}>
                 <input
                   type="file"
                   accept="application/pdf"
                   {...register("twelthPath", {
                     required: "12th Marksheet is required",
                   })}
-                  className="border p-2 rounded"
+                  className="border p-2 rounded w-full"
                 />
                 <Typography variant="body2" color="error">
                   {errors.twelthPath?.message}

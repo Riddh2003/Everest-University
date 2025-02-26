@@ -16,17 +16,17 @@ const HeroSection = () => {
           </p>
           <div className="mt-6 flex justify-center md:justify-start gap-4">
 
-            <Link to="/admission" className="cursor-pointer font-medium hover:text-white">
+            <Link to="/admissionpage" className="cursor-pointer font-medium hover:text-white">
               <button className="bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-500 transition">
                 Apply Now
               </button>
             </Link>
 
-            <a className="" href="#Courses">
+            <Link className="" href="#Courses">
               <button className="border border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-500 transition">
                 Explore Programs
               </button>
-            </a>
+            </Link>
           </div>
           <div className="mt-8 flex justify-center md:justify-start gap-8 text-white">
             <div>
