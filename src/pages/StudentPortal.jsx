@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Route, Routes, Navigate, useLocation, Outlet } from 'react-router-dom';
 import Sidebar from '../components/studentPortalPage/Sidebar';
 import menu from '../assets/images/menu.svg';
-import MyProfile from '../components/studentPortalPage/MyProfile';
 
 const StudentPortal = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);

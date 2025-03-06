@@ -53,8 +53,7 @@ const Student = () => {
         "http://localhost:9999/api/private/admin/getallstudents",
         {
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`
           },
         }
       );

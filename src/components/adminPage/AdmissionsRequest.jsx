@@ -5,118 +5,94 @@ import { useNavigate } from "react-router-dom";
 import { Flip, toast, ToastContainer } from "react-toastify";
 
 const AdmissionsRequest = () => {
-  const [admissionRequest, setadmissionRequest] = useState([]); // State to hold demo data
-  const [openIndex, setOpenIndex] = useState(null);
+  const [admissionRequest, setAdmissionRequest] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { isOpenForSideBar } = useTheme();
   const navigate = useNavigate();
 
-  const toggleDropdown = (index) => {
-    if (openIndex === index) {
-      setOpenIndex(null); // Close it if already open
-    } else {
-      setOpenIndex(index); // Open the selected dropdown
-    }
-  };
+  // Create an Axios instance with common configurations
+  const axiosInstance = axios.create({
+    baseURL: "http://localhost:9999/api/private/admin",
+    withCredentials: true, // Ensures cookies and authentication headers are sent
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token") || sessionStorage.getItem("token")}`,
+    },
+  });
+
+  useEffect(() => {
+    fetchAdmissionRequest();
+  }, []);
 
   const fetchAdmissionRequest = async () => {
     try {
-      const token =
-        localStorage.getItem("token") || sessionStorage.getItem("token");
-      console.log("Token : ", token);
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
-      if (token == null) {
+      if (!token) {
+        console.error("No token found. Redirecting to login...");
         navigate("/adminlogin");
+        return;
       }
 
-      const response = await axios.get(
-        "http://localhost:9999/api/private/admin/getalladmissionsrequest",
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log(response.data.data);
-      setadmissionRequest(response.data.data);
+      console.log("Fetching admissions request...");
+      const response = await axiosInstance.get("/getalladmissionsrequest");
+
+      console.log("API Response:", response); // Debugging the response
+
+      if (response.data.success) {
+        setAdmissionRequest(response.data.data);
+      } else {
+        toast.error(response.data.message || "No data available", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      }
     } catch (error) {
-      console.error("Error fetching admission requests :", error);
-      alert("Error fetching admission requests.");
+      console.error("Error fetching admission requests:", error);
+
+      toast.error("Error fetching admission requests. Please try again later.", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleApproveAdmission = async (email) => {
     try {
-      const token =
-        localStorage.getItem("token") || sessionStorage.getItem("token");
-      console.log("Token : ", token);
+      console.log(`Approving admission for email: ${email}`);
 
-      if (token == null) {
-        navigate("/adminlogin");
-      }
+      const response = await axiosInstance.get(`/approve?email=${email}`);
 
-      const response = await axios.get(
-        `http://localhost:9999/api/private/admin/approve?email=${email}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (response.status === 200) {
-        if (response.data.success === false) {
-          toast.error(response.data.message, {
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-            transition: Flip,
-          });
-        } else {
-          toast.success(response.data.message, {
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-            transition: Flip,
-          });
-        }
+      console.log("Approval API Response:", response);
+
+      if (response.status === 200 && response.data.success) {
+        toast.success(response.data.message, {
+          position: "top-center",
+          autoClose: 5000,
+          transition: Flip,
+        });
+        fetchAdmissionRequest(); // Refresh list after approval
+      } else {
+        toast.error(response.data.message, {
+          position: "top-center",
+          autoClose: 5000,
+          transition: Flip,
+        });
       }
     } catch (error) {
-      console.error("Error approving admission request :", error);
-      alert("Error approving admission request");
+      console.error("Error approving admission request:", error);
+      toast.error("Error approving admission request. Try again!", {
+        position: "top-center",
+        autoClose: 5000,
+      });
     }
   };
 
-  // fetch data when component mounts
-  useEffect(() => {
-    fetchAdmissionRequest();
-  }, []);
-
   return (
     <>
-      <ToastContainer
-        position="top-center"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick={false}
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        transition={Flip}
-      />
+      <ToastContainer position="top-center" autoClose={5000} transition={Flip} />
 
       <ThemeProvider value={{ isOpenForSideBar }}>
         <div
@@ -126,73 +102,63 @@ const AdmissionsRequest = () => {
           <h1 className="text-3xl font-bold text-center mb-8 text-blue-500">
             Admission Requests
           </h1>
-          <div className="overflow-x-auto">
-            <table className="min-w-full table-auto bg-white border-separate border border-gray-200 rounded-lg shadow-md">
-              {/* Table Header */}
-              <thead className="bg-blue-500 text-white">
-                <tr>
-                  <th className="px-4 py-2 text-left">Fullname</th>
-                  <th className="px-4 py-2 text-left">Email</th>
-                  <th className="px-4 py-2 text-left">Mobile</th>
-                  <th className="px-4 py-2 text-left">Gender</th>
-                  <th className="px-4 py-2 text-center">Degree</th>
-                  <th className="px-4 py-2 text-center">Status</th>
-                  <th className="px-4 py-2 text-center">Actions</th>
-                </tr>
-              </thead>
 
-              {/* Table Body */}
-              <tbody>
-                {admissionRequest && admissionRequest.length > 0 ? (
-                  admissionRequest.map((student, index) => (
-                    <tr
-                      key={index}
-                      className="odd:bg-gray-50 even:bg-gray-100 hover:bg-gray-200"
-                    >
-                      <td className="px-4 py-2 text-nowrap">
-                        {student.fullName}
-                      </td>
-                      <td className="px-4 py-2 text-nowrap">{student.email}</td>
-                      <td className="px-4 py-2 text-nowrap">
-                        {student.mobileNo}
-                      </td>
-                      <td className="px-4 py-2 text-nowrap">
-                        {student.gender}
-                      </td>
-                      <td className="px-4 py-2 text-nowrap">
-                        {student.degree}
-                      </td>
-                      <td className="px-4 py-2 text-nowrap">
-                        {student.status}
-                      </td>
-                      {/* Action Button */}
-                      <td className="px-4 py-2 text-center text-nowrap">
-                        <button
-                          className="text-blue-500 hover:text-blue-700"
-                          onClick={() => handleApproveAdmission(student.email)}
-                        >
-                          Approve
-                        </button>{" "}
-                        |{" "}
-                        <button className="text-blue-500 hover:text-blue-700">
-                          Reject
-                        </button>
+          {loading ? (
+            <p className="text-center text-gray-500">Loading...</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto bg-white border border-gray-200 rounded-lg shadow-md">
+                {/* Table Header */}
+                <thead className="bg-blue-500 text-white">
+                  <tr>
+                    <th className="px-4 py-2 text-left">Full Name</th>
+                    <th className="px-4 py-2 text-left">Email</th>
+                    <th className="px-4 py-2 text-left">Mobile</th>
+                    <th className="px-4 py-2 text-center">Program</th>
+                    <th className="px-4 py-2 text-center">State</th>
+                    <th className="px-4 py-2 text-center">Actions</th>
+                  </tr>
+                </thead>
+
+                {/* Table Body */}
+                <tbody>
+                  {admissionRequest.length > 0 ? (
+                    admissionRequest.map((student, index) => (
+                      <tr
+                        key={index}
+                        className="odd:bg-gray-50 even:bg-gray-100 hover:bg-gray-200"
+                      >
+                        <td className="px-4 py-2">{`${student.first_name} ${student.middle_name} ${student.sur_name}`}</td>
+                        <td className="px-4 py-2">{student.email}</td>
+                        <td className="px-4 py-2">{student.mobile_no}</td>
+                        <td className="px-4 py-2">{student.program}</td>
+                        <td className="px-4 py-2">{student.state}</td>
+                        {/* Action Buttons */}
+                        <td className="px-4 py-2 text-center">
+                          <button
+                            className="text-blue-500 hover:text-blue-700"
+                            onClick={() => handleApproveAdmission(student.email)}
+                          >
+                            Approve
+                          </button>{" "}
+                          |{" "}
+                          <button className="text-red-500 hover:text-red-700">
+                            Reject
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7" className="px-4 py-2 text-center text-gray-500">
+                        No admission requests found.
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan="13"
-                      className="px-4 py-2 text-center text-gray-500"
-                    >
-                      No students found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </ThemeProvider>
     </>

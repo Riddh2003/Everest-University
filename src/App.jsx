@@ -48,9 +48,10 @@ function App() {
 
 
         {/* Student Portal Routes */}
-        <Route path="/studentlogin" element={<StudentLogin />}></Route>
+        {/* <Route path="/studentlogin" element={<StudentLogin />}></Route> */}
         {/* Protected Student Routes */}
-        <Route element={<ProtectedRoutes allowedRole="student" />}>
+        {/* <Route element={<ProtectedRoutes allowedRole="student" />}> */}
+        <Route>
           <Route path="/studentportal" element={<StudentPortal />}>
             <Route index element={<MyProfile />} />
             <Route path="myprofile" element={<MyProfile />} />
@@ -76,7 +77,7 @@ function App() {
           </Route>
         </Route>
       </Routes>
-    </div>
+    </div >
   );
 }
 

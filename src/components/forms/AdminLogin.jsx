@@ -12,7 +12,7 @@ const useStyles = makeStyles(() => ({
   root: {
     "& .MuiOutlinedInput-root": {
       "& fieldset": {
-        borderColor: "black", // Always green border
+        borderColor: "black",
       },
       "&.Mui-focused fieldset": {
         borderColor: "green",
@@ -45,7 +45,7 @@ const useStyles = makeStyles(() => ({
     height: "100%",
   },
   form: {
-    backgroundColor: "rgba(255, 255, 255, 0.7)", // Transparent background
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
     padding: "30px",
     borderRadius: "10px",
     boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.3)",
