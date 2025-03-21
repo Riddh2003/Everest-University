@@ -3,7 +3,6 @@ import SmartUniversity from "../../assets/images/univ.jpg";
 import { TextField, Button, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { makeStyles } from "@mui/styles";
-import axios from "axios";
 import SendOtp from "../forms/SendOtp";
 import { Flip, toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -92,18 +91,10 @@ const StudentLogin = () => {
   const handleLogin = async (data) => {
     console.log("Login data:", data);
     try {
-      const response = await axios.post(
-        "http://localhost:9999/api/public/auth/studentlogin",
-        {
-          enrollmentId: data.enrollmentId,
-          password: data.password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await authService.studentLogin({
+        email: data.email,
+        password: data.password,
+      });
 
       if (response.status === 200) {
         if (response.data.success === false) {
@@ -153,17 +144,7 @@ const StudentLogin = () => {
   const handleSendOtp = async (data) => {
     console.log("Send OTP data:", data);
     try {
-      const response = await axios.post(
-        "http://localhost:9999/api/public/student/sendotp",
-        {
-          email: data,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await authService.studentSendOtp(data);
       if (response.status === 200) {
         if (response.data.success === false) {
           toast.error(response.data.message, {

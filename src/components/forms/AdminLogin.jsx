@@ -92,8 +92,9 @@ const AdminLogin = () => {
   const handleLogin = async (data) => {
     console.log("Login data:", data);
     try {
+      // Try using the proxy configured in vite.config.js
       const response = await axios.post(
-        "http://localhost:9999/api/public/auth/adminlogin",
+        "/api/public/auth/adminlogin",
         {
           email: data.email,
           password: data.password,
@@ -102,6 +103,7 @@ const AdminLogin = () => {
           headers: {
             "Content-Type": "application/json",
           },
+          withCredentials: true
         }
       );
 
@@ -145,7 +147,73 @@ const AdminLogin = () => {
       }
     } catch (error) {
       console.error("Error during login:", error);
-      alert("An error occurred during login." + error);
+
+      // If proxy fails, try direct URL as fallback
+      if (error.code === 'ERR_NETWORK') {
+        try {
+          console.log("Trying direct URL as fallback for login...");
+          const directResponse = await axios.post(
+            "http://localhost:9999/api/public/auth/adminlogin",
+            {
+              email: data.email,
+              password: data.password,
+            },
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+              withCredentials: true
+            }
+          );
+
+          if (directResponse.status === 200) {
+            if (directResponse.data.success === false) {
+              toast.error(directResponse.data.message, {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                transition: Flip,
+              });
+            } else {
+              const token = directResponse.data.token;
+              localStorage.setItem("token", token);
+              localStorage.setItem("role", "admin");
+              sessionStorage.setItem("token", token);
+              sessionStorage.setItem("role", "admin");
+              toast.success(directResponse.data.message, {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                transition: Flip,
+              });
+              // Delay navigation until toast is finished
+              setTimeout(() => {
+                navigate("/adminportal");
+              }, 3500);
+            }
+            return;
+          }
+        } catch (directError) {
+          console.error("Direct URL also failed for login:", directError);
+        }
+
+        toast.error("Network error. Please check if the backend server is running.", {
+          position: "top-center",
+          autoClose: 5000,
+        });
+      } else {
+        alert("An error occurred during login: " + error);
+      }
     }
   };
 
@@ -161,6 +229,7 @@ const AdminLogin = () => {
           headers: {
             "Content-Type": "application/json",
           },
+          withCredentials: true
         }
       );
       if (response.status === 200) {

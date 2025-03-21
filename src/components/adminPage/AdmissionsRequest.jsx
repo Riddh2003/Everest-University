@@ -1,24 +1,14 @@
 import React, { useState, useEffect } from "react";
 import useTheme, { ThemeProvider } from "../../context/NewContext";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Flip, toast, ToastContainer } from "react-toastify";
+import axios from "axios";
 
 const AdmissionsRequest = () => {
   const [admissionRequest, setAdmissionRequest] = useState([]);
   const [loading, setLoading] = useState(true);
   const { isOpenForSideBar } = useTheme();
   const navigate = useNavigate();
-
-  // Create an Axios instance with common configurations
-  const axiosInstance = axios.create({
-    baseURL: "http://localhost:9999/api/private/admin",
-    withCredentials: true, // Ensures cookies and authentication headers are sent
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token") || sessionStorage.getItem("token")}`,
-    },
-  });
 
   useEffect(() => {
     fetchAdmissionRequest();
@@ -35,7 +25,18 @@ const AdmissionsRequest = () => {
       }
 
       console.log("Fetching admissions request...");
-      const response = await axiosInstance.get("/getalladmissionsrequest");
+
+      // Try using the proxy configured in vite.config.js
+      const response = await axios.get(
+        "/api/private/admin/getalladmissionsrequest",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          withCredentials: true
+        }
+      );
 
       console.log("API Response:", response); // Debugging the response
 
@@ -50,10 +51,39 @@ const AdmissionsRequest = () => {
     } catch (error) {
       console.error("Error fetching admission requests:", error);
 
-      toast.error("Error fetching admission requests. Please try again later.", {
-        position: "top-center",
-        autoClose: 3000,
-      });
+      // If proxy fails, try direct URL as fallback
+      if (error.code === 'ERR_NETWORK') {
+        try {
+          console.log("Trying direct URL as fallback...");
+          const directResponse = await axios.get(
+            "http://localhost:9999/api/private/admin/getalladmissionsrequest",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+              },
+              withCredentials: true
+            }
+          );
+
+          if (directResponse.data.success) {
+            setAdmissionRequest(directResponse.data.data);
+            return;
+          }
+        } catch (directError) {
+          console.error("Direct URL also failed:", directError);
+        }
+
+        toast.error("Network error. Please check if the backend server is running.", {
+          position: "top-center",
+          autoClose: 5000,
+        });
+      } else {
+        toast.error("Error fetching admission requests. Please try again later.", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -62,8 +92,19 @@ const AdmissionsRequest = () => {
   const handleApproveAdmission = async (email) => {
     try {
       console.log(`Approving admission for email: ${email}`);
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
-      const response = await axiosInstance.get(`/approve?email=${email}`);
+      // Try using the proxy configured in vite.config.js
+      const response = await axios.get(
+        `/api/private/admin/approve?email=${email}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          withCredentials: true
+        }
+      );
 
       console.log("Approval API Response:", response);
 
@@ -83,6 +124,38 @@ const AdmissionsRequest = () => {
       }
     } catch (error) {
       console.error("Error approving admission request:", error);
+
+      // If proxy fails, try direct URL as fallback
+      if (error.code === 'ERR_NETWORK') {
+        try {
+          console.log("Trying direct URL as fallback for approval...");
+          const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
+          const directResponse = await axios.get(
+            `http://localhost:9999/api/private/admin/approve?registrationId=${registrationId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+              },
+              withCredentials: true
+            }
+          );
+
+          if (directResponse.status === 200 && directResponse.data.success) {
+            toast.success(directResponse.data.message, {
+              position: "top-center",
+              autoClose: 5000,
+              transition: Flip,
+            });
+            fetchAdmissionRequest(); // Refresh list after approval
+            return;
+          }
+        } catch (directError) {
+          console.error("Direct URL also failed for approval:", directError);
+        }
+      }
+
       toast.error("Error approving admission request. Try again!", {
         position: "top-center",
         autoClose: 5000,

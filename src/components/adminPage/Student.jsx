@@ -1,8 +1,9 @@
 import React, { useState, useContext, useEffect } from "react";
 import useTheme, { ThemeProvider } from "../../context/NewContext";
-import axios from "axios";
 import demoDataArray from './DemoData/demodata';
 import StudentsForm from './Forms/StudentsForm'; // Import the popup form
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
 
 const Student = () => {
   // const [students, setStudents] = useState(demoDataArray); // State to hold demo data
@@ -10,6 +11,7 @@ const Student = () => {
   const [openIndex, setOpenIndex] = useState(null); // Track which dropdown is open
   const [isPopupOpen, setIsPopupOpen] = useState(false); // Track popup visibility
   const [currentStudent, setCurrentStudent] = useState(null); // Track current student data for editing
+  const [loading, setLoading] = useState(true);
 
   const toggleDropdown = (index) => {
     if (openIndex === index) {
@@ -18,6 +20,7 @@ const Student = () => {
       setOpenIndex(index); // Open the selected dropdown
     }
   };
+
   const openPopup = (index) => {
     setCurrentStudent({ ...students[index], index }); // Include index in student data
     setIsPopupOpen(true);
@@ -42,26 +45,73 @@ const Student = () => {
     closePopup();
   };
 
-
   const fetchStudentData = async () => {
     try {
-      const token =
-        localStorage.getItem("token") || sessionStorage.getItem("token");
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
       console.log("Token : ", token);
 
+      if (!token) {
+        console.error("No token found.");
+        setLoading(false);
+        return;
+      }
+
+      // Try using the proxy configured in vite.config.js
       const response = await axios.get(
-        "http://localhost:9999/api/private/admin/getallstudents",
+        "/api/private/admin/getallstudents",
         {
           headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
           },
+          withCredentials: true
         }
       );
-      console.log(response.data.data)
+
+      console.log(response.data.data);
       setStudents(response.data.data);
+      setLoading(false);
     } catch (error) {
-      console.error("Error fetching students :", error);
-      alert("Error fetching students.");
+      console.error("Error fetching students:", error);
+
+      // If proxy fails, try direct URL as fallback
+      if (error.code === 'ERR_NETWORK') {
+        try {
+          console.log("Trying direct URL as fallback...");
+          const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
+          const directResponse = await axios.get(
+            "http://localhost:9999/api/private/admin/getallstudents",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+              },
+              withCredentials: true
+            }
+          );
+
+          if (directResponse.data.success) {
+            setStudents(directResponse.data.data);
+            setLoading(false);
+            return;
+          }
+        } catch (directError) {
+          console.error("Direct URL also failed:", directError);
+        }
+
+        toast.error("Network error. Please check if the backend server is running.", {
+          position: "top-center",
+          autoClose: 5000,
+        });
+      } else {
+        toast.error("Error fetching students. Please try again later.", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      }
+
+      setLoading(false);
     }
   };
 

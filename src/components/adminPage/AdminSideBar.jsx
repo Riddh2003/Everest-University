@@ -114,29 +114,25 @@ function AdminSideBar() {
         <>
             {/* Sidebar */}
             <div className={`${isOpenForSideBar ? 'w-64' : 'w-20'} bg-blue-600 text-white transition-all duration-300 ease-in-out transform fixed top-0 left-0 h-full mt-16`}>
-                {/* Navigation Links */}
-                <table className="mt-8 space-y-4">
-                    <tbody>
-                        {navLinks.map(({ to, name, icon }) => (
-                            <tr key={to}>
-                                <td>
+                {/* Navigation Links - Using div instead of table for better semantics */}
+                <div className="mt-8 space-y-4">
+                    {navLinks.map(({ to, name, icon }) => (
+                        <div key={to} className="flex items-center">
+                            <div className="px-6 py-2">
+                                <Link to={to} className="flex items-center">
+                                    {icon}
+                                </Link>
+                            </div>
+                            {isOpenForSideBar && (
+                                <div className="px-6 py-2 hover:bg-blue-500 cursor-pointer hover:rounded">
                                     <Link to={to}>
-                                        <td className='px-6 py-2'>
-                                            {icon}
-                                        </td>
+                                        {name}
                                     </Link>
-                                </td>
-                                <td>
-                                    <Link to={to}>
-                                        <td className={`${isOpenForSideBar ? 'px-6 py-2 hover:bg-blue-500 cursor-pointer hover:rounded' : 'hidden'}`}>
-                                            {name}
-                                        </td>
-                                    </Link>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
             </div>
         </>
     )
