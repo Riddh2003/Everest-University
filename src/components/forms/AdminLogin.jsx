@@ -3,10 +3,11 @@ import SmartUniversity from "../../assets/images/univ.jpg";
 import { TextField, Button, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { makeStyles } from "@mui/styles";
-import axios from "axios";
-import SendOtp from "./SendOtp";
 import { Flip, toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
+import { useAuth } from "../../context/AuthContext";
+import SendOtp from "./SendOtp";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -82,156 +83,54 @@ const AdminLogin = () => {
       },
       pattern: {
         value:
-          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/,
+          /^(?=.*[a-z])(?=.*)(?=.*\d)(?=.*[@$!%*?&])[a-z\d@$!%*?&]{8,15}$/,
         message:
           "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
       },
     },
   };
 
-  const handleLogin = async (data) => {
-    console.log("Login data:", data);
-    try {
-      // Try using the proxy configured in vite.config.js
-      const response = await axios.post(
-        "/api/public/auth/adminlogin",
-        {
-          email: data.email,
-          password: data.password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true
-        }
-      );
+  const { adminLogin } = useAuth();
 
-      if (response.status === 200) {
-        if (response.data.success === false) {
-          toast.error(response.data.message, {
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-            transition: Flip,
-          });
-        } else {
-          const token = response.data.token;
-          localStorage.setItem("token", token);
-          localStorage.setItem("role", "admin");
-          sessionStorage.setItem("token", token);
-          sessionStorage.setItem("role", "admin");
-          toast.success(response.data.message, {
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-            transition: Flip,
-          });
-          // Delay navigation until toast is finished
-          setTimeout(() => {
-            navigate("/adminportal");
-          }, 3500);
-        }
+  const handleLogin = async (data) => {
+    try {
+      const result = await adminLogin(data.email, data.password);
+
+      if (result.success) {
+        toast.success(result.message, {
+          position: "top-center",
+          autoClose: 3000
+        });
+
+        setTimeout(() => {
+          navigate("/adminportal");
+        }, 3000);
       } else {
-        alert("An error occurred during login.");
+        toast.error(result.message, {
+          position: "top-center",
+          autoClose: 5000
+        });
       }
     } catch (error) {
-      console.error("Error during login:", error);
-
-      // If proxy fails, try direct URL as fallback
-      if (error.code === 'ERR_NETWORK') {
-        try {
-          console.log("Trying direct URL as fallback for login...");
-          const directResponse = await axios.post(
-            "http://localhost:9999/api/public/auth/adminlogin",
-            {
-              email: data.email,
-              password: data.password,
-            },
-            {
-              headers: {
-                "Content-Type": "application/json",
-              },
-              withCredentials: true
-            }
-          );
-
-          if (directResponse.status === 200) {
-            if (directResponse.data.success === false) {
-              toast.error(directResponse.data.message, {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-                transition: Flip,
-              });
-            } else {
-              const token = directResponse.data.token;
-              localStorage.setItem("token", token);
-              localStorage.setItem("role", "admin");
-              sessionStorage.setItem("token", token);
-              sessionStorage.setItem("role", "admin");
-              toast.success(directResponse.data.message, {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-                transition: Flip,
-              });
-              // Delay navigation until toast is finished
-              setTimeout(() => {
-                navigate("/adminportal");
-              }, 3500);
-            }
-            return;
-          }
-        } catch (directError) {
-          console.error("Direct URL also failed for login:", directError);
-        }
-
-        toast.error("Network error. Please check if the backend server is running.", {
-          position: "top-center",
-          autoClose: 5000,
-        });
-      } else {
-        alert("An error occurred during login: " + error);
-      }
+      console.error("Login error:", error);
+      toast.error("Login failed. Please try again.", {
+        position: "top-center",
+        autoClose: 5000
+      });
     }
   };
 
   const handleSendOtp = async (data) => {
     console.log("Send OTP data:", data);
     try {
-      const response = await axios.post(
-        "http://localhost:9999/api/public/auth/sendotp",
-        {
-          email: data,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true
+      const response = await axios.post('/api/public/auth/sendotp', {
+        email: data.email
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
         }
-      );
+      });
+
       if (response.status === 200) {
         if (response.data.success === false) {
           toast.error(response.data.message, {
@@ -260,17 +159,50 @@ const AdminLogin = () => {
           setIsSendOtpOpen(false);
           setIsForgotPasswordOpen(true);
         }
-      } else {
-        alert("An error occurred during sendotp.");
       }
     } catch (error) {
-      console.error("Error during sendotp:", error);
+      console.error("Error sending OTP:", error);
+      const errorMessage = error.response?.data?.message || "Failed to send OTP. Please try again later.";
+      toast.error(errorMessage, {
+        position: "top-center",
+        autoClose: 5000,
+      });
     }
   };
 
   const handleForgotPassword = async (data) => {
     console.log("Forgot Password data:", data);
-    // Implement your forgot password logic here
+    try {
+      const response = await axios.post('/api/public/auth/forgotpassword', data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.status === 200) {
+        toast.success(response.data.message, {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Flip,
+        });
+        // Handle successful password reset
+        setIsForgotPasswordOpen(false);
+        setIsLoginOpen(true);
+      }
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      const errorMessage = error.response?.data?.message || "Failed to reset password. Please try again later.";
+      toast.error(errorMessage, {
+        position: "top-center",
+        autoClose: 5000,
+      });
+    }
   };
 
   return (

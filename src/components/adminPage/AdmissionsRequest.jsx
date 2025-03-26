@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import useTheme, { ThemeProvider } from "../../context/NewContext";
 import { useNavigate } from "react-router-dom";
 import { Flip, toast, ToastContainer } from "react-toastify";
-import axios from "axios";
+import axiosInstance from '../../utils/axiosConfig';
 
 const AdmissionsRequest = () => {
   const [admissionRequest, setAdmissionRequest] = useState([]);
@@ -16,74 +16,33 @@ const AdmissionsRequest = () => {
 
   const fetchAdmissionRequest = async () => {
     try {
-      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+      const token = localStorage.getItem("token");
 
       if (!token) {
-        console.error("No token found. Redirecting to login...");
+        toast.error("No authentication token found", {
+          position: "top-center",
+          autoClose: 3000
+        });
         navigate("/adminlogin");
         return;
       }
 
-      console.log("Fetching admissions request...");
-
-      // Try using the proxy configured in vite.config.js
-      const response = await axios.get(
-        "/api/private/admin/getalladmissionsrequest",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
-          withCredentials: true
-        }
-      );
-
-      console.log("API Response:", response); // Debugging the response
+      const response = await axiosInstance.get('/api/private/admin/getalladmissionsrequest');
 
       if (response.data.success) {
         setAdmissionRequest(response.data.data);
       } else {
-        toast.error(response.data.message || "No data available", {
+        toast.error(response.data.message || "Failed to fetch admission requests", {
           position: "top-center",
-          autoClose: 3000,
+          autoClose: 3000
         });
       }
     } catch (error) {
       console.error("Error fetching admission requests:", error);
-
-      // If proxy fails, try direct URL as fallback
-      if (error.code === 'ERR_NETWORK') {
-        try {
-          console.log("Trying direct URL as fallback...");
-          const directResponse = await axios.get(
-            "http://localhost:9999/api/private/admin/getalladmissionsrequest",
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json"
-              },
-              withCredentials: true
-            }
-          );
-
-          if (directResponse.data.success) {
-            setAdmissionRequest(directResponse.data.data);
-            return;
-          }
-        } catch (directError) {
-          console.error("Direct URL also failed:", directError);
-        }
-
-        toast.error("Network error. Please check if the backend server is running.", {
-          position: "top-center",
-          autoClose: 5000,
-        });
-      } else {
-        toast.error("Error fetching admission requests. Please try again later.", {
-          position: "top-center",
-          autoClose: 3000,
-        });
-      }
+      toast.error(error.response?.data?.message || "Error fetching admission requests", {
+        position: "top-center",
+        autoClose: 3000
+      });
     } finally {
       setLoading(false);
     }
@@ -91,74 +50,20 @@ const AdmissionsRequest = () => {
 
   const handleApproveAdmission = async (email) => {
     try {
-      console.log(`Approving admission for email: ${email}`);
-      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+      const response = await axiosInstance.post('/api/private/admin/approve', { email });
 
-      // Try using the proxy configured in vite.config.js
-      const response = await axios.get(
-        `/api/private/admin/approve?email=${email}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
-          withCredentials: true
-        }
-      );
-
-      console.log("Approval API Response:", response);
-
-      if (response.status === 200 && response.data.success) {
+      if (response.data.success) {
         toast.success(response.data.message, {
           position: "top-center",
-          autoClose: 5000,
-          transition: Flip,
+          autoClose: 3000
         });
-        fetchAdmissionRequest(); // Refresh list after approval
-      } else {
-        toast.error(response.data.message, {
-          position: "top-center",
-          autoClose: 5000,
-          transition: Flip,
-        });
+        fetchAdmissionRequest();
       }
     } catch (error) {
-      console.error("Error approving admission request:", error);
-
-      // If proxy fails, try direct URL as fallback
-      if (error.code === 'ERR_NETWORK') {
-        try {
-          console.log("Trying direct URL as fallback for approval...");
-          const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-
-          const directResponse = await axios.get(
-            `http://localhost:9999/api/private/admin/approve?registrationId=${registrationId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json"
-              },
-              withCredentials: true
-            }
-          );
-
-          if (directResponse.status === 200 && directResponse.data.success) {
-            toast.success(directResponse.data.message, {
-              position: "top-center",
-              autoClose: 5000,
-              transition: Flip,
-            });
-            fetchAdmissionRequest(); // Refresh list after approval
-            return;
-          }
-        } catch (directError) {
-          console.error("Direct URL also failed for approval:", directError);
-        }
-      }
-
-      toast.error("Error approving admission request. Try again!", {
+      console.error("Error approving admission:", error);
+      toast.error(error.response?.data?.message || "Failed to approve admission", {
         position: "top-center",
-        autoClose: 5000,
+        autoClose: 3000
       });
     }
   };

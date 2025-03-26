@@ -1,16 +1,21 @@
 import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const ProtectedRoutes = ({ allowedRole }) => {
-  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-  const role = localStorage.getItem("role") || sessionStorage.getItem("role");
+  const { isAuthenticated, user, loading } = useAuth();
 
-  console.log("Token:", token);
-  console.log("Role:", role);
-  if (!token) {
+  // While checking authentication status, show a loading state or return null
+  if (loading) {
+    return null; // Could replace with a loading spinner component if desired
+  }
+
+  // Check if user is authenticated and has the correct role
+  if (!isAuthenticated) {
     console.log(`Redirecting to ${allowedRole === "admin" ? "/adminlogin" : "/studentlogin"}`);
     return <Navigate to={allowedRole === "admin" ? "/adminlogin" : "/studentlogin"} replace />;
   }
-  if (!role || role !== allowedRole) {
+
+  if (!user || user.role !== allowedRole) {
     return <Navigate to={allowedRole === "admin" ? "/adminlogin" : "/studentlogin"} replace />;
   }
 

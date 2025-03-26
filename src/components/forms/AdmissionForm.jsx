@@ -11,7 +11,7 @@ import {
   Grid,
 } from "@mui/material";
 import Loader from "../basicComponents/Loader.jsx";
-import axios from "axios";
+import axios from 'axios';
 import { Flip, toast, ToastContainer } from "react-toastify";
 
 const AdmissionForm = () => {
@@ -54,112 +54,52 @@ const AdmissionForm = () => {
     }
 
     try {
-      // Try using the proxy configured in vite.config.js
-      const response = await axios.post(
-        "/api/public/admission/registration",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          withCredentials: true
-        }
-      );
+      const response = await axios.post('/api/public/admission/registration', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-      if (response.status === 200) {
-        if (response.data.success === false) {
-          toast.error(response.data.message, {
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-            transition: Flip,
-          });
-        } else {
-          toast.success(response.data.message, {
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-            transition: Flip,
-          });
-          reset();
-        }
+      if (response.status === 200 && response.data.success) {
+        toast.success(response.data.message || "Admission form submitted successfully!", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Flip,
+        });
+        reset(); // Reset form after successful submission
       } else {
-        alert("An error occurred during login.");
+        toast.error(response.data.message || "Failed to submit admission form", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Flip,
+        });
       }
     } catch (error) {
       console.error("Error submitting admission form:", error);
-
-      // If proxy fails, try direct URL as fallback
-      if (error.code === 'ERR_NETWORK') {
-        try {
-          console.log("Trying direct URL as fallback for admission form...");
-          const directResponse = await axios.post(
-            "http://localhost:9999/api/public/admission/registration",
-            formData,
-            {
-              headers: {
-                "Content-Type": "multipart/form-data",
-              },
-              withCredentials: true
-            }
-          );
-
-          if (directResponse.status === 200) {
-            // Handle success response
-            if (directResponse.data.success === false) {
-              toast.error(directResponse.data.message, {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-                transition: Flip,
-              });
-            } else {
-              toast.success(directResponse.data.message, {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-                transition: Flip,
-              });
-              reset();
-            }
-            setIsLoading(false);
-            return;
-          }
-        } catch (directError) {
-          console.error("Direct URL also failed for admission form:", directError);
-        }
-
-        toast.error("Network error. Please check if the backend server is running.", {
-          position: "top-center",
-          autoClose: 5000,
-        });
-      } else {
-        toast.error("Error submitting form. Please try again later.", {
-          position: "top-center",
-          autoClose: 5000,
-        });
-      }
-
+      toast.error(error.response?.data?.message || "Failed to submit admission form. Please try again later.", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Flip,
+      });
+    } finally {
       setIsLoading(false);
     }
   };
