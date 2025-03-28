@@ -13,97 +13,159 @@ import {
 import Loader from "../basicComponents/Loader.jsx";
 import axios from 'axios';
 import { Flip, toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AdmissionForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [tenthFile, setTenthFile] = useState(null);
+  const [twelthFile, setTwelthFile] = useState(null);
+
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm({ mode: "onTouched", reValidateMode: "onChange" });
+  } = useForm({
+    mode: "onTouched",
+    reValidateMode: "onChange",
+    defaultValues: {
+      surName: '',
+      firstName: '',
+      middleName: '',
+      mobileNo: '',
+      email: '',
+      gender: '',
+      dateOfBirth: '',
+      city: '',
+      state: '',
+      program: '',
+      degree: '',
+      degreeName: '',
+    }
+  });
+
+  const validateFile = (file, fieldName) => {
+    if (!file) {
+      toast.error(`${fieldName} is required`, {
+        position: "top-center",
+        autoClose: 3000
+      });
+      return false;
+    }
+
+    if (file.type !== 'application/pdf') {
+      toast.error(`${fieldName} must be a PDF file`, {
+        position: "top-center",
+        autoClose: 3000
+      });
+      return false;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      toast.error(`${fieldName} must be less than 5MB`, {
+        position: "top-center",
+        autoClose: 3000
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleTenthFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file && validateFile(file, "10th Marksheet")) {
+      setTenthFile(file);
+    } else {
+      event.target.value = '';
+    }
+  };
+
+  const handleTwelthFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file && validateFile(file, "12th Marksheet")) {
+      setTwelthFile(file);
+    } else {
+      event.target.value = '';
+    }
+  };
 
   const onSubmit = async (data) => {
-    setIsLoading(true);
-
-    // Prepare JSON data (excluding file fields)
-    const jsonData = JSON.stringify({
-      surName: data.surName,
-      firstName: data.firstName,
-      middleName: data.middleName,
-      mobileNo: data.mobileNo,
-      email: data.email,
-      gender: data.gender,
-      dateOfBirth: data.dateOfBirth,
-      city: data.city,
-      state: data.state,
-      program: data.program,
-      degree: data.degree,
-      degreeName: data.degreeName,
-    });
-
-    const formData = new FormData();
-    formData.append("registrationJson", jsonData);
-
-    // Append files (if selected)
-    if (data.tenthFilePath[0]) {
-      formData.append("tenthFile", data.tenthFilePath[0]);
-    }
-    if (data.twelthPath[0]) {
-      formData.append("twelthFile", data.twelthPath[0]);
-    }
-
     try {
-      const response = await axios.post('/api/public/admission/registration', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      setIsLoading(true);
 
-      if (response.status === 200 && response.data.success) {
-        toast.success(response.data.message || "Admission form submitted successfully!", {
+      // Validate required files
+      if (!tenthFile || !twelthFile) {
+        toast.error("Both 10th and 12th marksheets are required", {
           position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Flip,
+          autoClose: 3000
         });
-        reset(); // Reset form after successful submission
+        return;
+      }
+
+      // Create form data
+      const formData = new FormData();
+
+      // Add student details as a JSON string
+      const studentDetails = {
+        surName: data.surName,
+        firstName: data.firstName,
+        middleName: data.middleName,
+        mobileNo: data.mobileNo,
+        email: data.email,
+        gender: data.gender,
+        dateOfBirth: data.dateOfBirth,
+        city: data.city,
+        state: data.state,
+        program: data.program,
+        degree: data.degree,
+        degreeName: data.degreeName
+      };
+
+      // Append student details and files
+      formData.append("registrationJson", JSON.stringify(studentDetails));
+      formData.append("tenthFile", tenthFile);
+      formData.append("twelthFile", twelthFile);
+
+      const response = await axios.post(
+        'http://localhost:9999/api/public/admission/registration',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+
+      if (response.data.success) {
+        toast.success(response.data.message || "Registration successful!", {
+          position: "top-center",
+          autoClose: 3000
+        });
+
+        // Reset form and file states
+        reset();
+        setTenthFile(null);
+        setTwelthFile(null);
+
+        // Reset file inputs
+        document.getElementById('tenthFileInput').value = '';
+        document.getElementById('twelthFileInput').value = '';
       } else {
-        toast.error(response.data.message || "Failed to submit admission form", {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Flip,
-        });
+        throw new Error(response.data.message || "Registration failed");
       }
     } catch (error) {
-      console.error("Error submitting admission form:", error);
-      toast.error(error.response?.data?.message || "Failed to submit admission form. Please try again later.", {
+      console.error("Registration error:", error);
+      toast.error(error.response?.data?.message || "Failed to submit form", {
         position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Flip,
+        autoClose: 3000
       });
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Calculate date for age validation
   const today = new Date();
   const fifteenYearsAgo = new Date(today.setFullYear(today.getFullYear() - 15))
     .toISOString()
@@ -111,40 +173,34 @@ const AdmissionForm = () => {
 
   return (
     <>
-      <ToastContainer
-        position="top-center"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick={false}
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        transition={Flip}
-      />
+      <ToastContainer position="top-center" autoClose={3000} />
 
       <Container className="p-5 w-full max-w-4xl mx-auto">
         {isLoading && <Loader />}
         <Paper className="p-5 shadow-lg rounded-lg bg-white border border-[#345d7c]">
-          <Typography
-            variant="h4"
-            className="text-center font-semibold text-2xl text-[#5CB338]"
-          >
+          <Typography variant="h4" className="text-center font-semibold text-2xl text-[#5CB338] mb-4">
             Student Registration
           </Typography>
-          <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
-            <Grid container spacing={2}>
+
+          <form onSubmit={handleSubmit(onSubmit)} noValidate>
+            <Grid container spacing={3}>
+              {/* Personal Information */}
               <Grid item xs={12} sm={6}>
                 <TextField
-                  {...register("surName", { required: "Surname is required" })}
+                  {...register("surName", {
+                    required: "Surname is required",
+                    pattern: {
+                      value: /^[A-Za-z\s]+$/,
+                      message: "Only letters are allowed"
+                    }
+                  })}
                   label="Surname"
                   fullWidth
                   error={!!errors.surName}
                   helperText={errors.surName?.message}
                 />
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <TextField
                   {...register("firstName", {
@@ -242,29 +298,31 @@ const AdmissionForm = () => {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <input
+                  id="tenthFileInput"
                   type="file"
                   accept="application/pdf"
-                  {...register("tenthFilePath", {
-                    required: "10th Marksheet is required",
-                  })}
+                  onChange={handleTenthFileChange}
                   className="border p-2 rounded w-full"
                 />
-                <Typography variant="body2" color="error">
-                  {errors.tenthFilePath?.message}
-                </Typography>
+                {!tenthFile && (
+                  <Typography variant="body2" color="error">
+                    10th Marksheet is required (PDF only, max 5MB)
+                  </Typography>
+                )}
               </Grid>
               <Grid item xs={12} sm={6}>
                 <input
+                  id="twelthFileInput"
                   type="file"
                   accept="application/pdf"
-                  {...register("twelthPath", {
-                    required: "12th Marksheet is required",
-                  })}
+                  onChange={handleTwelthFileChange}
                   className="border p-2 rounded w-full"
                 />
-                <Typography variant="body2" color="error">
-                  {errors.twelthPath?.message}
-                </Typography>
+                {!twelthFile && (
+                  <Typography variant="body2" color="error">
+                    12th Marksheet is required (PDF only, max 5MB)
+                  </Typography>
+                )}
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -295,12 +353,19 @@ const AdmissionForm = () => {
                   helperText={errors.degreeName?.message}
                 />
               </Grid>
+              <Grid item xs={12}>
+                <Box display="flex" justifyContent="center" mt={2}>
+                  <Button
+                    variant="contained"
+                    color="success"
+                    type="submit"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Submitting..." : "Submit"}
+                  </Button>
+                </Box>
+              </Grid>
             </Grid>
-            <Box display="flex" justifyContent="center" mt={4}>
-              <Button variant="contained" color="success" type="submit">
-                Submit
-              </Button>
-            </Box>
           </form>
         </Paper>
       </Container>
