@@ -38,11 +38,11 @@ const Exam = () => {
 
     return (
         <div className="overflow-x-auto px-4">
-            <h2 className="text-xl font-bold mb-4 text-[#345D7C]">Exam Details</h2>
+            <h2 className="text-xl font-bold mb-4 text-blue-500">Exam Details</h2>
 
             {/* Table View for Larger Screens */}
             <table className="min-w-full table-auto hidden md:table">
-                <thead className="bg-[#345D7C]">
+                <thead className="bg-blue-500">
                     <tr className='text-white'>
                         <th className="px-6 py-3 text-lg text-left">Subject</th>
                         <th className="px-6 py-3 text-lg text-left">Date</th>

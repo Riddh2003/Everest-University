@@ -53,7 +53,7 @@ const Assignments = () => {
 
     return (
         <div className="overflow-x-auto px-4 py-6">
-            <h2 className="text-xl font-semibold text-[#345D7C] mb-4">Assignments</h2>
+            <h2 className="text-xl font-semibold text-blue-500 mb-4">Assignments</h2>
 
             {/* Semester Filter */}
             <div className="mb-4">
@@ -75,7 +75,7 @@ const Assignments = () => {
             {/* Table View for Large Screens */}
             <table className="w-full table-auto border border-gray-300 hidden md:table">
                 <thead>
-                    <tr className="border-b bg-[#345D7C] text-white text-lg">
+                    <tr className="border-b bg-blue-500 text-white text-lg">
                         <th className="px-4 py-3 text-left">Title</th>
                         <th className="px-4 py-3 text-left">Description</th>
                         <th className="px-4 py-3 text-left">Due Date</th>

@@ -38,7 +38,7 @@ const Payments = () => {
     return (
         <div className="px-4">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Payment History</h2>
+                <h2 className="text-xl font-semibold text-blue-500">Payment History</h2>
                 <div className="flex gap-4">
                     <select
                         value={semester}
@@ -68,9 +68,9 @@ const Payments = () => {
 
             {/* Payment Summary */}
             <div className="mb-4">
-                <h3 className="text-lg font-semibold mb-2">Payment Summary</h3>
+                <h3 className="text-lg font-semibold mb-2 text-blue-500">Payment Summary</h3>
                 <table className="min-w-full table-auto">
-                    <thead className="bg-[#345D7C] text-white">
+                    <thead className="bg-blue-500 text-white">
                         <tr>
                             <th className="px-6 py-3 text-left">Year</th>
                             <th className="px-6 py-3 text-left">Semester</th>
@@ -100,7 +100,7 @@ const Payments = () => {
             {/* Payments Table */}
             <div className="overflow-x-auto">
                 <table className="min-w-full table-auto">
-                    <thead className="bg-[#345D7C] text-white">
+                    <thead className="bg-blue-500 text-white">
                         <tr>
                             <th className="px-6 py-3 text-left">Transaction ID</th>
                             <th className="px-6 py-3 text-left">Amount (₹)</th>

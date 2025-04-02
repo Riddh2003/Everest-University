@@ -34,7 +34,7 @@ const Attendance = () => {
 
     return (
         <div className="w-full p-6">
-            <h2 className="text-3xl font-semibold mb-6 text-center">Welcome, {studentName}</h2>
+            <h2 className="text-3xl font-semibold mb-6 text-center text-blue-500">Welcome, {studentName}</h2>
 
             {/* Semester Filter */}
             <div className="mb-8">
@@ -57,7 +57,7 @@ const Attendance = () => {
             {/* Attendance Table */}
             <div className="overflow-x-auto">
                 <table className="min-w-full table-auto border-collapse border border-gray-300">
-                    <thead className="bg-[#345D7C] text-white">
+                    <thead className="bg-blue-500 text-white">
                         <tr>
                             <th className="border border-gray-300 px-6 py-3 text-left">Date</th>
                             <th className="border border-gray-300 px-6 py-3 text-left">Subject</th>

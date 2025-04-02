@@ -58,7 +58,7 @@ const CourseMaterial = () => {
 
     return (
         <div className="w-full p-6">
-            <h2 className="text-3xl font-semibold mb-6 text-center">Course Materials</h2>
+            <h2 className="text-3xl font-semibold mb-6 text-center text-blue-500">Course Materials</h2>
 
             {/* Search and Filters */}
             <div className="flex flex-wrap justify-center gap-4 mb-8">
@@ -132,14 +132,14 @@ const CourseMaterial = () => {
                                     href={material.fileUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="px-4 py-2 bg-[#345D7C] text-white rounded-md hover:bg-blue-600 transition"
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
                                 >
                                     View Material
                                 </a>
                                 <a
                                     href={material.fileUrl}
                                     download
-                                    className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition"
+                                    className="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 transition"
                                 >
                                     Download
                                 </a>

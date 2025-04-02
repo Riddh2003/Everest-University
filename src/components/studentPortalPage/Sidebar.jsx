@@ -84,7 +84,7 @@ const Sidebar = () => {
     return (
         <div>
             {/* Sidebar */}
-            <div className={`${isOpenForSideBar ? 'w-64' : 'w-20'} bg-[#345D7C] text-white transition-all duration-300 ease-in-out transform fixed flex flex-col justify-between top-0 left-0 h-full`}>
+            <div className={`${isOpenForSideBar ? 'w-64' : 'w-20'} bg-blue-600 text-white transition-all duration-300 ease-in-out transform fixed flex flex-col justify-between top-0 left-0 h-full`}>
                 {/* Navigation Links */}
                 <div className="space-y-4">
                     <div className="p-4 border-b">
@@ -94,7 +94,7 @@ const Sidebar = () => {
                     </div>
                     {navLinks.map(({ to, name, icon }) => (
                         <div key={to} className="flex items-center">
-                            <Link to={to} onClick={() => setActiveItem(to)} className={`flex items-center w-full px-6 py-2 hover:bg-[#5eaeff] cursor-pointer ${activeItem === to ? 'bg-[#5eaeff]' : ''}`}>
+                            <Link to={to} onClick={() => setActiveItem(to)} className={`flex items-center w-full px-6 py-2 hover:bg-blue-500 cursor-pointer ${activeItem === to ? 'bg-blue-500' : ''}`}>
                                 <span className="mr-4">{icon}</span>
                                 <span className={`${isOpenForSideBar ? 'block' : 'hidden'} ${name === 'Logout' ? 'text-red-500' : 'text-white'} font-semibold text-md`}>{name}</span>
                             </Link>

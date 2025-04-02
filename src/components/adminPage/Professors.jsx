@@ -1,14 +1,64 @@
-import React, { useState } from 'react';
-import useTheme from '../../context/NewContext'; // Make sure to adjust the path if needed
-import demodata_professors from './DemoData/demodata_professors';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import useTheme from '../../context/NewContext';
 import ProfessorsForm from './Forms/ProfessorsForm';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Professors() {
-  const { isOpenForSideBar } = useTheme(); // Access the theme context
-
-  const [professors, setProfessors] = useState(demodata_professors);
+  const { isOpenForSideBar } = useTheme();
+  const navigate = useNavigate();
+  const [professors, setProfessors] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [currentProfessor, setCurrentProfessor] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState({
+    department: "All Departments",
+    role: "All Roles",
+    status: "All Status",
+  });
+
+  useEffect(() => {
+    const fetchFaculty = async () => {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        toast.error('Please login first');
+        navigate('/adminlogin');
+        return;
+      }
+
+      try {
+        const response = await axios.get('http://localhost:9999/api/private/profile/getallfaculty', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        console.log(response.data);
+        if (response.data) {
+          // Correctly access the data array from response
+          setProfessors(response.data || []);
+        } else {
+          throw new Error(response.data.message || 'Failed to fetch faculty data');
+        }
+      } catch (error) {
+        console.error('Error fetching faculty:', error);
+        if (error.response?.status === 401) {
+          toast.error('Session expired. Please login again');
+          localStorage.removeItem('token');
+          navigate('/adminlogin');
+        } else {
+          toast.error(error.response?.data?.message || 'Error fetching faculty data');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFaculty();
+  }, [navigate]);
 
   const openPopup = (index) => {
     setCurrentProfessor({ ...professors[index], index });
@@ -22,36 +72,30 @@ function Professors() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setCurrentProfessor({ ...currentProfessor, [name]: value });
+    setCurrentProfessor(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const updatedProfessors = [...professors];
-    updatedProfessors[currentProfessor.index] = { ...currentProfessor };
-    delete updatedProfessors[currentProfessor.index].index;
-    setProfessors(updatedProfessors);
-    closePopup();
+    // Add your update logic here
   };
 
-  // demo data for professors
-  const facultyData = demodata_professors;
-
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filters, setFilters] = useState({
-    department: "All Departments",
-    role: "All Roles",
-    status: "All Status",
-  });
-
-  const filteredFaculty = facultyData.filter((faculty) => {
-    const matchesSearch = faculty.name.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredFaculty = professors.filter((faculty) => {
+    const matchesSearch = faculty.name?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDepartment = filters.department === "All Departments" || faculty.department === filters.department;
     const matchesRole = filters.role === "All Roles" || faculty.role === filters.role;
     const matchesStatus = filters.status === "All Status" || faculty.status === filters.status;
 
     return matchesSearch && matchesDepartment && matchesRole && matchesStatus;
   });
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
     <div className={`flex-1 bg-gray-100 p-2 transition-all duration-300 ${isOpenForSideBar ? 'ml-64' : 'ml-20'}`}>
@@ -161,26 +205,29 @@ function Professors() {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {filteredFaculty.map((faculty, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
+                  <tr key={faculty.id || index} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <input type="checkbox" className="rounded" />
                     </td>
                     <td className="px-6 py-4">{faculty.name}</td>
                     <td className="px-6 py-4">{faculty.email}</td>
-                    <td className="px-6 py-4">{faculty.password}</td>
-                    <td className="px-6 py-4 flex items-center gap-2">
-                      <img
-                        src={faculty.profilePicture}
-                        className="w-8 h-8 rounded-full"
-                        alt="avatar"
-                      />
+                    <td className="px-6 py-4">********</td>
+                    <td className="px-6 py-4">
+                      {faculty.profilePicture && (
+                        <img
+                          src={faculty.profilePicture}
+                          className="w-8 h-8 rounded-full"
+                          alt="avatar"
+                        />
+                      )}
                     </td>
                     <td className="px-6 py-4">{faculty.role}</td>
                     <td className="px-6 py-4">{faculty.qualification}</td>
                     <td className="px-6 py-4">
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full ${faculty.status === "Active" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}
-                      >
+                      <span className={`px-2 py-1 text-xs rounded-full ${faculty.status === "Active"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800"
+                        }`}>
                         {faculty.status}
                       </span>
                     </td>
@@ -189,8 +236,15 @@ function Professors() {
                     <td className="px-6 py-4">{faculty.updatedAt}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
-                        <button className="text-blue-500 hover:text-blue-700" onClick={() => { openPopup(index) }}>Edit</button>
-                        <button className="text-red-500 hover:text-red-700">Delete</button>
+                        <button
+                          className="text-blue-500 hover:text-blue-700"
+                          onClick={() => openPopup(index)}
+                        >
+                          Edit
+                        </button>
+                        <button className="text-red-500 hover:text-red-700">
+                          Delete
+                        </button>
                       </div>
                     </td>
                   </tr>

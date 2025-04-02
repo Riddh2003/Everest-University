@@ -1,144 +1,153 @@
 import React, { useState, useEffect } from "react";
-import useTheme, { ThemeProvider } from "../../context/NewContext";
 import { useNavigate } from "react-router-dom";
 import { Flip, toast, ToastContainer } from "react-toastify";
-import axiosInstance from '../../utils/axiosConfig';
+import axios from "axios";
+
+const API_URL = "http://localhost:9999/api/private/admin";
 
 const AdmissionsRequest = () => {
-  const [admissionRequest, setAdmissionRequest] = useState([]);
+  const [admissionRequests, setAdmissionRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { isOpenForSideBar } = useTheme();
+  const [actionLoading, setActionLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchAdmissionRequest();
-  }, []);
+  // Fetch admission requests from backend
+  const fetchAdmissionRequests = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please login first");
+      navigate("/adminlogin");
+      return;
+    }
 
-  const fetchAdmissionRequest = async () => {
     try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        toast.error("No authentication token found", {
-          position: "top-center",
-          autoClose: 3000
-        });
-        navigate("/adminlogin");
-        return;
-      }
-
-      const response = await axiosInstance.get('/api/private/admin/getalladmissionsrequest');
-
+      setLoading(true);
+      const response = await axios.get(`${API_URL}/getalladmissionsrequest`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log(response.data.data);
       if (response.data.success) {
-        setAdmissionRequest(response.data.data);
+        setAdmissionRequests(response.data.data); // Store fetched data
       } else {
-        toast.error(response.data.message || "Failed to fetch admission requests", {
-          position: "top-center",
-          autoClose: 3000
-        });
+        toast.error(response.data.message || "Failed to fetch data");
       }
     } catch (error) {
-      console.error("Error fetching admission requests:", error);
-      toast.error(error.response?.data?.message || "Error fetching admission requests", {
-        position: "top-center",
-        autoClose: 3000
-      });
+      console.error("Error fetching admissions:", error);
+      toast.error("Error fetching admissions");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleApproveAdmission = async (email) => {
+  // Approve or Reject Admission with full data
+  const handleAdmissionAction = async (request, action) => {
+    if (!request) {
+      toast.error("Invalid admission data");
+      return;
+    }
+
     try {
-      const response = await axiosInstance.post('/api/private/admin/approve', { email });
+      setActionLoading(true);
+      const token = localStorage.getItem("token");
+
+      const response = await axios.post(
+        `${API_URL}/${action}`,
+        request, // Send full request data
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log(`${action} Response:`, response.data);
 
       if (response.data.success) {
-        toast.success(response.data.message, {
-          position: "top-center",
-          autoClose: 3000
-        });
-        fetchAdmissionRequest();
+        toast.success(response.data.message);
+        fetchAdmissionRequests(); // Refresh data after action
+      } else {
+        throw new Error(response.data.message || `Failed to ${action} admission`);
       }
     } catch (error) {
-      console.error("Error approving admission:", error);
-      toast.error(error.response?.data?.message || "Failed to approve admission", {
-        position: "top-center",
-        autoClose: 3000
-      });
+      console.error(`${action} Error:`, error);
+      toast.error(error.response?.data?.message || `Failed to ${action} admission`);
+    } finally {
+      setActionLoading(false);
     }
   };
 
+  // Fetch data when component loads
+  useEffect(() => {
+    fetchAdmissionRequests();
+  }, []);
+
   return (
     <>
-      <ToastContainer position="top-center" autoClose={5000} transition={Flip} />
+      <ToastContainer position="top-center" autoClose={3000} transition={Flip} />
+      <div className="flex-1 bg-gray-100 p-6">
+        <h1 className="text-3xl font-bold text-center mb-8 text-blue-500">
+          Admission Requests
+        </h1>
 
-      <ThemeProvider value={{ isOpenForSideBar }}>
-        <div
-          className={`flex-1 bg-gray-100 p-6 transition-all duration-300 ${isOpenForSideBar ? "ml-64" : "ml-20"
-            }`}
-        >
-          <h1 className="text-3xl font-bold text-center mb-8 text-blue-500">
-            Admission Requests
-          </h1>
-
-          {loading ? (
-            <p className="text-center text-gray-500">Loading...</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full table-auto bg-white border border-gray-200 rounded-lg shadow-md">
-                {/* Table Header */}
-                <thead className="bg-blue-500 text-white">
-                  <tr>
-                    <th className="px-4 py-2 text-left">Full Name</th>
-                    <th className="px-4 py-2 text-left">Email</th>
-                    <th className="px-4 py-2 text-left">Mobile</th>
-                    <th className="px-4 py-2 text-center">Program</th>
-                    <th className="px-4 py-2 text-center">State</th>
-                    <th className="px-4 py-2 text-center">Actions</th>
-                  </tr>
-                </thead>
-
-                {/* Table Body */}
-                <tbody>
-                  {admissionRequest.length > 0 ? (
-                    admissionRequest.map((student, index) => (
-                      <tr
-                        key={index}
-                        className="odd:bg-gray-50 even:bg-gray-100 hover:bg-gray-200"
-                      >
-                        <td className="px-4 py-2">{`${student.first_name} ${student.middle_name} ${student.sur_name}`}</td>
-                        <td className="px-4 py-2">{student.email}</td>
-                        <td className="px-4 py-2">{student.mobile_no}</td>
-                        <td className="px-4 py-2">{student.program}</td>
-                        <td className="px-4 py-2">{student.state}</td>
-                        {/* Action Buttons */}
-                        <td className="px-4 py-2 text-center">
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full table-auto bg-white border border-gray-200 rounded-lg shadow-md">
+              <thead className="bg-blue-500 text-white">
+                <tr>
+                  <th className="px-4 py-2 text-left">Full Name</th>
+                  <th className="px-4 py-2 text-left">Email</th>
+                  <th className="px-4 py-2 text-left">Mobile</th>
+                  <th className="px-4 py-2 text-center">Program</th>
+                  <th className="px-4 py-2 text-center">State</th>
+                  <th className="px-4 py-2 text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {admissionRequests.length > 0 ? (
+                  admissionRequests.map((request) => (
+                    <tr key={request.registrationId} className="border-b hover:bg-gray-50">
+                      <td className="px-4 py-2">{`${request.firstName} ${request.middleName} ${request.surName}`}</td>
+                      <td className="px-4 py-2">{request.email}</td>
+                      <td className="px-4 py-2">{request.mobileNo}</td>
+                      <td className="px-4 py-2 text-center">{request.program}</td>
+                      <td className="px-4 py-2 text-center">{request.state}</td>
+                      <td className="px-4 py-2 text-center">
+                        <div className="flex justify-center gap-2">
                           <button
-                            className="text-blue-500 hover:text-blue-700"
-                            onClick={() => handleApproveAdmission(student.email)}
+                            onClick={() => handleAdmissionAction(request, "approve")}
+                            className="px-3 py-1 text-white bg-green-500 rounded hover:bg-green-600 transition-colors disabled:opacity-50"
+                            disabled={actionLoading}
                           >
-                            Approve
-                          </button>{" "}
-                          |{" "}
-                          <button className="text-red-500 hover:text-red-700">
-                            Reject
+                            {actionLoading ? "Processing..." : "Approve"}
                           </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="7" className="px-4 py-2 text-center text-gray-500">
-                        No admission requests found.
+                          <button
+                            onClick={() => handleAdmissionAction(request, "reject")}
+                            className="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600 transition-colors disabled:opacity-50"
+                            disabled={actionLoading}
+                          >
+                            {actionLoading ? "Processing..." : "Reject"}
+                          </button>
+                        </div>
                       </td>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </ThemeProvider>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="text-center py-4 text-gray-500">
+                      No admission requests found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </>
   );
 };
