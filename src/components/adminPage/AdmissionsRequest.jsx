@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import useTheme, { ThemeProvider } from "../../context/NewContext";
 import { useNavigate } from "react-router-dom";
 import { Flip, toast, ToastContainer } from "react-toastify";
 import axios from "axios";
@@ -9,6 +10,7 @@ const AdmissionsRequest = () => {
   const [admissionRequests, setAdmissionRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const { isOpenForSideBar } = useTheme();
   const navigate = useNavigate();
 
   // Fetch admission requests from backend
@@ -83,72 +85,98 @@ const AdmissionsRequest = () => {
   }, []);
 
   return (
-    <>
-      <ToastContainer position="top-center" autoClose={3000} transition={Flip} />
-      <div className="flex-1 bg-gray-100 p-6">
-        <h1 className="text-3xl font-bold text-center mb-8 text-blue-500">
-          Admission Requests
-        </h1>
+    <ThemeProvider>
+      <div className={`flex-1 transition-all duration-300 ${isOpenForSideBar ? 'ml-64' : 'ml-20'}`}>
+        <ToastContainer position="top-center" autoClose={3000} transition={Flip} />
+        <div className="bg-gray-100 p-4 md:p-6 min-h-screen">
+          <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8 text-blue-500">
+            Admission Requests
+          </h1>
 
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full table-auto bg-white border border-gray-200 rounded-lg shadow-md">
-              <thead className="bg-blue-500 text-white">
-                <tr>
-                  <th className="px-4 py-2 text-left">Full Name</th>
-                  <th className="px-4 py-2 text-left">Email</th>
-                  <th className="px-4 py-2 text-left">Mobile</th>
-                  <th className="px-4 py-2 text-center">Program</th>
-                  <th className="px-4 py-2 text-center">State</th>
-                  <th className="px-4 py-2 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {admissionRequests.length > 0 ? (
-                  admissionRequests.map((request) => (
-                    <tr key={request.registrationId} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-2">{`${request.firstName} ${request.middleName} ${request.surName}`}</td>
-                      <td className="px-4 py-2">{request.email}</td>
-                      <td className="px-4 py-2">{request.mobileNo}</td>
-                      <td className="px-4 py-2 text-center">{request.program}</td>
-                      <td className="px-4 py-2 text-center">{request.state}</td>
-                      <td className="px-4 py-2 text-center">
-                        <div className="flex justify-center gap-2">
-                          <button
-                            onClick={() => handleAdmissionAction(request, "approve")}
-                            className="px-3 py-1 text-white bg-green-500 rounded hover:bg-green-600 transition-colors disabled:opacity-50"
-                            disabled={actionLoading}
-                          >
-                            {actionLoading ? "Processing..." : "Approve"}
-                          </button>
-                          <button
-                            onClick={() => handleAdmissionAction(request, "reject")}
-                            className="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600 transition-colors disabled:opacity-50"
-                            disabled={actionLoading}
-                          >
-                            {actionLoading ? "Processing..." : "Reject"}
-                          </button>
-                        </div>
-                      </td>
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            </div>
+          ) : (
+            <div className="max-w-[90%] mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full divide-y divide-gray-200">
+                  <thead className="bg-blue-500">
+                    <tr>
+                      <th scope="col" className="sticky top-0 z-10 px-6 py-4 text-left text-sm font-semibold text-white tracking-wider">
+                        Full Name
+                      </th>
+                      <th scope="col" className="sticky top-0 z-10 px-6 py-4 text-left text-sm font-semibold text-white tracking-wider">
+                        Email
+                      </th>
+                      <th scope="col" className="sticky top-0 z-10 px-6 py-4 text-left text-sm font-semibold text-white tracking-wider">
+                        Mobile
+                      </th>
+                      <th scope="col" className="sticky top-0 z-10 px-6 py-4 text-center text-sm font-semibold text-white tracking-wider">
+                        Program
+                      </th>
+                      <th scope="col" className="sticky top-0 z-10 px-6 py-4 text-center text-sm font-semibold text-white tracking-wider">
+                        State
+                      </th>
+                      <th scope="col" className="sticky top-0 z-10 px-6 py-4 text-center text-sm font-semibold text-white tracking-wider">
+                        Actions
+                      </th>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="text-center py-4 text-gray-500">
-                      No admission requests found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {admissionRequests.length > 0 ? (
+                      admissionRequests.map((request) => (
+                        <tr key={request.registrationId} className="hover:bg-gray-50 transition-colors duration-200">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {`${request.firstName} ${request.middleName} ${request.surName}`}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {request.email}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {request.mobileNo}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                            {request.program}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                            {request.state}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                            <div className="flex justify-center gap-3">
+                              <button
+                                onClick={() => handleAdmissionAction(request, "approve")}
+                                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                                disabled={actionLoading}
+                              >
+                                {actionLoading ? "Processing..." : "Approve"}
+                              </button>
+                              <button
+                                onClick={() => handleAdmissionAction(request, "reject")}
+                                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                                disabled={actionLoading}
+                              >
+                                {actionLoading ? "Processing..." : "Reject"}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="6" className="px-6 py-10 text-sm text-gray-500 text-center bg-gray-50">
+                          No admission requests found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </>
+    </ThemeProvider>
   );
 };
 

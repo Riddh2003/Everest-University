@@ -58,7 +58,7 @@ const Student = () => {
 
       // Try using the proxy configured in vite.config.js
       const response = await axios.get(
-        "/api/private/admin/getallstudents",
+        "http://localhost:9999/api/private/student/getallstudent",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -159,6 +159,7 @@ const Student = () => {
                     key={index}
                     className="odd:bg-gray-50 even:bg-gray-100 hover:bg-gray-200"
                   >
+                    <td className="px-4 py-2 text-nowrap">{student.enrollmentId}</td>
                     <td className="px-4 py-2 text-nowrap">{student.surName}</td>
                     <td className="px-4 py-2 text-nowrap">{student.firstName}</td>
                     <td className="px-4 py-2 text-nowrap">{student.middleName}</td>
