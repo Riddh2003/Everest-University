@@ -1,9 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import useTheme, { ThemeProvider } from "../../context/NewContext";
-import demoDataArray from './DemoData/demodata';
-import StudentsForm from './Forms/StudentsForm'; // Import the popup form
+import StudentsForm from './StudentsForm'; // Import the popup form
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
 
 const Student = () => {
   // const [students, setStudents] = useState(demoDataArray); // State to hold demo data

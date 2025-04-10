@@ -66,7 +66,7 @@ const StudentLogin = () => {
         // Add a slight delay before navigation to allow the toast to be visible
         setTimeout(() => {
           navigate("/studentportal");
-        }, 1500);
+        }, 1000);
       } else {
         toast.error(result.message || "Login failed", {
           position: "top-center",

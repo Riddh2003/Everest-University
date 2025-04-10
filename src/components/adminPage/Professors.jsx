@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useTheme from '../../context/NewContext';
-import ProfessorsForm from './Forms/ProfessorsForm';
+import ProfessorsForm from './ProfessorsForm';
 import axios from 'axios';
-import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 function Professors() {
@@ -60,8 +59,13 @@ function Professors() {
     fetchFaculty();
   }, [navigate]);
 
-  const openPopup = (index) => {
-    setCurrentProfessor({ ...professors[index], index });
+  // Update the openPopup function to handle both edit and add
+  const openPopup = (index = null) => {
+    if (index !== null) {
+      setCurrentProfessor({ ...professors[index] });
+    } else {
+      setCurrentProfessor(null); // For adding new faculty
+    }
     setIsPopupOpen(true);
   };
 
@@ -128,9 +132,14 @@ function Professors() {
                   />
                 </svg>
               </div>
-              <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+              {/* // Update the Add Faculty button to open the form */}
+              <button 
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                onClick={() => openPopup()}
+              >
                 Add Faculty
               </button>
+
               <select
                 className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 onChange={(e) => console.log(e.target.value)}
@@ -293,11 +302,9 @@ function Professors() {
           </div>
         </div>
       </section>
-      {isPopupOpen && currentProfessor && (
+      {isPopupOpen && (
         <ProfessorsForm
           facultyData={currentProfessor}
-          onChange={handleChange}
-          onSubmit={handleSubmit}
           onClose={closePopup}
         />
       )}
