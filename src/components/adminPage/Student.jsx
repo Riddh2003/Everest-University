@@ -71,46 +71,9 @@ const Student = () => {
       console.log(response.data.data);
       setStudents(response.data.data);
       setLoading(false);
-    } catch (error) {
+    } catch (error) 
+    {
       console.error("Error fetching students:", error);
-
-      // If proxy fails, try direct URL as fallback
-      if (error.code === 'ERR_NETWORK') {
-        try {
-          console.log("Trying direct URL as fallback...");
-          const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-
-          const directResponse = await axios.get(
-            "http://localhost:9999/api/private/admin/getallstudents",
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json"
-              },
-              withCredentials: true
-            }
-          );
-
-          if (directResponse.data.success) {
-            setStudents(directResponse.data.data);
-            setLoading(false);
-            return;
-          }
-        } catch (directError) {
-          console.error("Direct URL also failed:", directError);
-        }
-
-        toast.error("Network error. Please check if the backend server is running.", {
-          position: "top-center",
-          autoClose: 5000,
-        });
-      } else {
-        toast.error("Error fetching students. Please try again later.", {
-          position: "top-center",
-          autoClose: 3000,
-        });
-      }
-
       setLoading(false);
     }
   };

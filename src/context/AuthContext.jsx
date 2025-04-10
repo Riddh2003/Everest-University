@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { use } from 'react';
 
 const AuthContext = createContext(null);
 
@@ -18,7 +19,7 @@ export const AuthProvider = ({ children }) => {
                 if (token) {
                     try {
                         // Verify token by getting user profile
-                        const response = await axios.get('/api/private/profile/getuser', {
+                        const response = await axios.get(`http://localhost:9999/api/private/profile/getstudent?enrollmentId=${enrollmentId}`, {
                             headers: {
                                 'Content-Type': 'application/json',
                                 'Authorization': `Bearer ${token}`
@@ -60,42 +61,69 @@ export const AuthProvider = ({ children }) => {
     const studentLogin = async (enrollmentId, password) => {
         try {
             setLoading(true);
-            const response = await axios.post('/api/public/auth/studentlogin',
-                { enrollmentId, password },
-                {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-
+            console.log("[AUTH] Attempting student login for:", enrollmentId);
+    
+            // Send the data directly, not nested in a userData object
+            const response = await axios.post('http://localhost:9999/api/public/auth/studentlogin', {
+                enrollmentId,
+                password
+            });
+            console.log("[AUTH] Student login response:", response);
+    
             if (response.status === 200 && response.data.success) {
-                const { token } = response.data;
+                const token = response.data.token;
                 localStorage.setItem('token', token);
                 localStorage.setItem('role', 'student');
                 sessionStorage.setItem('token', token);
                 sessionStorage.setItem('role', 'student');
-
-                // Get user profile
-                const profileResponse = await axios.get('/api/private/profile/getuser', {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                sessionStorage.setItem('enrollmentId', enrollmentId);
+    
+                // Get user profile - fix the API call
+                console.log('token : ', token);
+                try {
+                    const studentResponse = await axios.get(`http://localhost:9999/api/private/student/getstudent?enrollmentId=${enrollmentId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        // Allow 302 status to be treated as success
+                        validateStatus: function (status) {
+                            return status === 200 || status === 302;
+                        }
+                    });
+                    
+                    // console.log("[AUTH] Student profile response:", studentResponse);
+                    
+                    if (studentResponse.data) {
+                        setUser({
+                            ...studentResponse.data,
+                            role: 'student'
+                        });
+                        console.log("[AUTH] User state updated with profile data");
+                    } else {
+                        console.error("[AUTH] Student profile data is empty");
+                        // Set minimal user data if profile fetch fails
+                        setUser({
+                            enrollmentId,
+                            role: 'student'
+                        });
                     }
-                });
-
-                setUser({
-                    ...profileResponse.data,
-                    role: 'student'
-                });
-
+                } catch (profileError) {
+                    console.error("[AUTH] Error fetching student profile:", profileError);
+                    // Set minimal user data if profile fetch fails
+                    setUser({
+                        enrollmentId,
+                        role: 'student'
+                    });
+                }
+                
                 return { success: true, message: response.data.message };
             } else {
-                return { success: false, message: response.data.message };
+                return { success: false, message: response.data.message || "Login failed" };
             }
         } catch (err) {
+            console.error("[AUTH] Login error:", err);
             setError(err.message);
-            return { success: false, message: 'Login failed. Please try again.' };
+            return { success: false, message: err.response?.data?.message || 'Login failed. Please try again.' };
         } finally {
             setLoading(false);
         }

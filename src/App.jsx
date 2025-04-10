@@ -49,7 +49,6 @@ function App() {
 
         {/* Student Portal Routes */}
         <Route path="/studentlogin" element={<StudentLogin />}></Route>
-        {/* Protected Student Routes */}
         <Route element={<ProtectedRoutes allowedRole="student" />}>
           <Route path="/studentportal" element={<StudentPortal />}>
             <Route index element={<MyProfile />} />
