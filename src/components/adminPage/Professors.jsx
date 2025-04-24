@@ -4,6 +4,39 @@ import useTheme from '../../context/NewContext';
 import ProfessorsForm from './ProfessorsForm';
 import axios from 'axios';
 import 'react-toastify/dist/ReactToastify.css';
+import {
+  Box,
+  Paper,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Button,
+  TextField,
+  InputAdornment,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Grid,
+  Chip,
+  IconButton,
+  Avatar,
+  Checkbox,
+  CircularProgress,
+  Pagination,
+  Container,
+  Toolbar,
+} from '@mui/material';
+import {
+  Search as SearchIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Add as AddIcon,
+} from '@mui/icons-material';
 
 function Professors() {
   const { isOpenForSideBar } = useTheme();
@@ -18,6 +51,8 @@ function Professors() {
     role: "All Roles",
     status: "All Status",
   });
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 10;
 
   useEffect(() => {
     const fetchFaculty = async () => {
@@ -84,6 +119,10 @@ function Professors() {
     // Add your update logic here
   };
 
+  const handlePageChange = (event, newPage) => {
+    setPage(newPage);
+  };
+
   const filteredFaculty = professors.filter((faculty) => {
     const matchesSearch = faculty.name?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDepartment = filters.department === "All Departments" || faculty.department === filters.department;
@@ -93,222 +132,278 @@ function Professors() {
     return matchesSearch && matchesDepartment && matchesRole && matchesStatus;
   });
 
+  // Pagination
+  const startIndex = (page - 1) * rowsPerPage;
+  const paginatedFaculty = filteredFaculty.slice(startIndex, startIndex + rowsPerPage);
+  const totalPages = Math.ceil(filteredFaculty.length / rowsPerPage);
+
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-      </div>
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="80vh"
+      >
+        <CircularProgress />
+      </Box>
     );
   }
 
   return (
-    <div className={`flex-1 bg-gray-100 p-2 transition-all duration-300 ${isOpenForSideBar ? 'ml-64' : 'ml-20'}`}>
-      <section id="faculty" className="p-6">
-        <div className="bg-white border border-gray-200 rounded-lg shadow-lg">
+    <Box
+      sx={{
+        flexGrow: 1,
+        p: 3,
+        transition: 'margin 0.3s ease',
+        ml: isOpenForSideBar ? '240px' : '70px',
+      }}
+    >
+      <Container maxWidth="xl">
+        <Paper elevation={3} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+          {/* Header */}
+          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} md={4}>
+                <Typography variant="h6" color="primary" fontWeight="medium">
+                  Faculty Records
+                </Typography>
+              </Grid>
 
-          {/* Table Header */}
-          <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 className="text-lg font-semibold text-blue-500">Faculty Records</h2>
-            <div className="flex flex-col lg:flex-row gap-2 w-full sm:w-auto">
-              <div className="relative w-full sm:w-64">
-                <input
-                  type="text"
-                  placeholder="Search faculty..."
-                  className="pl-8 pr-4 py-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <svg
-                  className="w-4 h-4 absolute left-2.5 top-3 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              <Grid item xs={12} md={8}>
+                <Box display="flex" gap={2} flexWrap="wrap">
+                  <TextField
+                    placeholder="Search faculty..."
+                    size="small"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    sx={{ flexGrow: 1 }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
+                    }}
                   />
-                </svg>
-              </div>
-              {/* // Update the Add Faculty button to open the form */}
-              <button 
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                onClick={() => openPopup()}
-              >
-                Add Faculty
-              </button>
 
-              <select
-                className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onChange={(e) => console.log(e.target.value)}
-              >
-                <option>Bulk Actions</option>
-                <option>Delete Selected</option>
-                <option>Update Status</option>
-                <option>Export Data</option>
-              </select>
-            </div>
-          </div>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<AddIcon />}
+                    onClick={() => openPopup()}
+                  >
+                    Add Faculty
+                  </Button>
+
+                  <FormControl size="small" sx={{ minWidth: 150 }}>
+                    <InputLabel>Bulk Actions</InputLabel>
+                    <Select
+                      label="Bulk Actions"
+                      defaultValue=""
+                    >
+                      <MenuItem value="">
+                        <em>Select Action</em>
+                      </MenuItem>
+                      <MenuItem value="delete">Delete Selected</MenuItem>
+                      <MenuItem value="update">Update Status</MenuItem>
+                      <MenuItem value="export">Export Data</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
+              </Grid>
+            </Grid>
+          </Box>
 
           {/* Filters */}
-          <div className="p-4 border-b border-gray-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <select
-              className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={filters.department}
-              onChange={(e) => setFilters({ ...filters, department: e.target.value })}
-            >
-              <option>All Departments</option>
-              <option>Computer Science</option>
-              <option>Engineering</option>
-              <option>Business</option>
-              <option>Arts</option>
-            </select>
-            <select
-              className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={filters.role}
-              onChange={(e) => setFilters({ ...filters, role: e.target.value })}
-            >
-              <option>All Roles</option>
-              <option>Professor</option>
-              <option>Associate Professor</option>
-              <option>Assistant Professor</option>
-              <option>Lecturer</option>
-            </select>
-            <select
-              className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={filters.status}
-              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-            >
-              <option>All Status</option>
-              <option>Active</option>
-              <option>On Leave</option>
-              <option>Retired</option>
-            </select>
-            <button className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors">
-              Apply Filters
-            </button>
-          </div>
+          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.default' }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={3}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Department</InputLabel>
+                  <Select
+                    value={filters.department}
+                    label="Department"
+                    onChange={(e) => setFilters({ ...filters, department: e.target.value })}
+                  >
+                    <MenuItem value="All Departments">All Departments</MenuItem>
+                    <MenuItem value="Computer Science">Computer Science</MenuItem>
+                    <MenuItem value="Engineering">Engineering</MenuItem>
+                    <MenuItem value="Business">Business</MenuItem>
+                    <MenuItem value="Arts">Arts</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={3}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Role</InputLabel>
+                  <Select
+                    value={filters.role}
+                    label="Role"
+                    onChange={(e) => setFilters({ ...filters, role: e.target.value })}
+                  >
+                    <MenuItem value="All Roles">All Roles</MenuItem>
+                    <MenuItem value="Professor">Professor</MenuItem>
+                    <MenuItem value="Associate Professor">Associate Professor</MenuItem>
+                    <MenuItem value="Assistant Professor">Assistant Professor</MenuItem>
+                    <MenuItem value="Lecturer">Lecturer</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={3}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    value={filters.status}
+                    label="Status"
+                    onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                  >
+                    <MenuItem value="All Status">All Status</MenuItem>
+                    <MenuItem value="Active">Active</MenuItem>
+                    <MenuItem value="On Leave">On Leave</MenuItem>
+                    <MenuItem value="Retired">Retired</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={3}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                >
+                  Apply Filters
+                </Button>
+              </Grid>
+            </Grid>
+          </Box>
 
           {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    <input type="checkbox" className="rounded" />
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Password</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profile Picture</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qualification</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Department</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created At</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Updated At</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {filteredFaculty.map((faculty, index) => (
-                  <tr key={faculty.id || index} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <input type="checkbox" className="rounded" />
-                    </td>
-                    <td className="px-6 py-4">{faculty.name}</td>
-                    <td className="px-6 py-4">{faculty.email}</td>
-                    <td className="px-6 py-4">********</td>
-                    <td className="px-6 py-4">
-                      {faculty.profilePicture && (
-                        <img
+          <TableContainer sx={{ maxHeight: '60vh' }}>
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow>
+                  <TableCell padding="checkbox">
+                    <Checkbox size="small" />
+                  </TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Password</TableCell>
+                  <TableCell>Profile</TableCell>
+                  <TableCell>Role</TableCell>
+                  <TableCell>Qualification</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Department</TableCell>
+                  <TableCell>Created At</TableCell>
+                  <TableCell>Updated At</TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {paginatedFaculty.map((faculty, index) => (
+                  <TableRow
+                    key={faculty.id || index}
+                    hover
+                    sx={{
+                      '&:last-child td, &:last-child th': { border: 0 },
+                    }}
+                  >
+                    <TableCell padding="checkbox">
+                      <Checkbox size="small" />
+                    </TableCell>
+                    <TableCell>{faculty.name}</TableCell>
+                    <TableCell>{faculty.email}</TableCell>
+                    <TableCell>********</TableCell>
+                    <TableCell>
+                      {faculty.profilePicture ? (
+                        <Avatar
                           src={faculty.profilePicture}
-                          className="w-8 h-8 rounded-full"
-                          alt="avatar"
+                          alt={faculty.name}
+                          sx={{ width: 32, height: 32 }}
                         />
+                      ) : (
+                        <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
+                          {faculty.name ? faculty.name.charAt(0) : 'F'}
+                        </Avatar>
                       )}
-                    </td>
-                    <td className="px-6 py-4">{faculty.role}</td>
-                    <td className="px-6 py-4">{faculty.qualification}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 text-xs rounded-full ${faculty.status === "Active"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
-                        }`}>
-                        {faculty.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">{faculty.department}</td>
-                    <td className="px-6 py-4">{faculty.createdAt}</td>
-                    <td className="px-6 py-4">{faculty.updatedAt}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex gap-2">
-                        <button
-                          className="text-blue-500 hover:text-blue-700"
-                          onClick={() => openPopup(index)}
+                    </TableCell>
+                    <TableCell>{faculty.role}</TableCell>
+                    <TableCell>{faculty.qualification}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={faculty.status}
+                        size="small"
+                        color={faculty.status === "Active" ? "success" : "warning"}
+                        variant="outlined"
+                      />
+                    </TableCell>
+                    <TableCell>{faculty.department}</TableCell>
+                    <TableCell>{faculty.createdAt}</TableCell>
+                    <TableCell>{faculty.updatedAt}</TableCell>
+                    <TableCell align="center">
+                      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => openPopup(startIndex + index)}
                         >
-                          Edit
-                        </button>
-                        <button className="text-red-500 hover:text-red-700">
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton size="small" color="error">
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+
+                {paginatedFaculty.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={12} sx={{ textAlign: 'center', py: 3 }}>
+                      <Typography color="text.secondary">No faculty found.</Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
 
           {/* Pagination */}
-          <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-            <div className="flex-1 flex justify-between sm:hidden">
-              <button className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                Previous
-              </button>
-              <button className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                Next
-              </button>
-            </div>
-            <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm text-gray-700">
-                  Showing <span className="font-medium">1</span> to <span className="font-medium">10</span> of{" "}
-                  <span className="font-medium">45</span> faculty members
-                </p>
-              </div>
-              <div>
-                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                  <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                    Previous
-                  </button>
-                  <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                    1
-                  </button>
-                  <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                    2
-                  </button>
-                  <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                    3
-                  </button>
-                  <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                    Next
-                  </button>
-                </nav>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+          <Box sx={{
+            p: 2,
+            borderTop: 1,
+            borderColor: 'divider',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 2
+          }}>
+            <Typography variant="body2" color="text.secondary">
+              Showing {paginatedFaculty.length > 0 ? startIndex + 1 : 0} to {Math.min(startIndex + rowsPerPage, filteredFaculty.length)} of {filteredFaculty.length} faculty members
+            </Typography>
+
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+              shape="rounded"
+            />
+          </Box>
+        </Paper>
+      </Container>
+
       {isPopupOpen && (
         <ProfessorsForm
           facultyData={currentProfessor}
           onClose={closePopup}
         />
       )}
-    </div>
+    </Box>
   );
 }
 

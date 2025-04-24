@@ -1,203 +1,302 @@
-import React from 'react'
-import useTheme from '../../context/NewContext'; // Access theme context to manage sidebar state
+import React, { useState } from 'react';
+import useTheme from '../../context/NewContext';
+import {
+  Box,
+  Container,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Checkbox,
+  InputAdornment,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Grid,
+  Chip,
+  Avatar,
+  IconButton,
+  Pagination,
+  Stack
+} from '@mui/material';
+import {
+  Search as SearchIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon
+} from '@mui/icons-material';
 
 function Courses() {
-  const { isOpenForSideBar } = useTheme(); // Retrieve sidebar state from the theme context
+  const { isOpenForSideBar } = useTheme();
+  const [filters, setFilters] = useState({
+    course: 'All Courses',
+    year: 'All Years',
+    status: 'All Status'
+  });
+  const [page, setPage] = useState(1);
+
+  // Sample data - in a real app, this would come from an API
+  const students = [
+    {
+      id: 'STU001',
+      name: 'Alex Johnson',
+      age: 20,
+      course: 'Computer Science',
+      year: 'Second Year',
+      status: 'Active',
+      avatar: 'https://avatar.iran.liara.run/public'
+    },
+    {
+      id: 'STU002',
+      name: 'Sarah Williams',
+      age: 19,
+      course: 'Engineering',
+      year: 'First Year',
+      status: 'On Leave',
+      avatar: 'https://avatar.iran.liara.run/public'
+    }
+  ];
+
+  const handleFilterChange = (event) => {
+    const { name, value } = event.target;
+    setFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handlePageChange = (event, value) => {
+    setPage(value);
+  };
 
   return (
-    <div className={`flex-1 bg-gray-100 p-6 transition-all duration-300 ${isOpenForSideBar ? 'ml-64' : 'ml-20'}`}>
-      {/* Section for displaying student records */}
-      <section id="students" className="p-6">
-        <div className="bg-white border border-gray-200 rounded-lg shadow-lg">
-          {/* Table Header */}
-          <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 className="text-lg font-semibold text-blue-500">Student Records</h2>
-            <div className="flex flex-col lg:flex-row gap-2 w-full sm:w-auto">
-              {/* Search bar */}
-              <div className="relative w-full sm:w-64">
-                <input
-                  type="text"
-                  placeholder="Search students..."
-                  className="pl-8 pr-4 py-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <svg
-                  className="w-4 h-4 absolute left-2.5 top-3 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+    <Box
+      sx={{
+        flexGrow: 1,
+        p: 3,
+        bgcolor: 'background.default',
+        transition: 'margin 0.3s ease',
+        ml: isOpenForSideBar ? '240px' : '70px',
+      }}
+    >
+      <Container maxWidth="xl">
+        <Paper elevation={3} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+          {/* Header */}
+          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} md={4}>
+                <Typography variant="h6" color="primary" fontWeight="medium">
+                  Student Records
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} md={8}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                  <TextField
+                    placeholder="Search students..."
+                    size="small"
+                    sx={{ flexGrow: 1 }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
+                    }}
                   />
-                </svg>
-              </div>
-              {/* Button to add a new student */}
-              <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
-                Add Student
-              </button>
-              {/* Bulk Actions dropdown */}
-              <select className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option>Bulk Actions</option>
-                <option>Delete Selected</option>
-                <option>Update Status</option>
-                <option>Export Selected</option>
-              </select>
-            </div>
-          </div>
 
-          {/* Filters section */}
-          <div className="p-4 border-b border-gray-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Course filter */}
-            <select className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option>All Courses</option>
-              <option>Computer Science</option>
-              <option>Engineering</option>
-              <option>Business</option>
-            </select>
-            {/* Year filter */}
-            <select className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option>All Years</option>
-              <option>First Year</option>
-              <option>Second Year</option>
-              <option>Third Year</option>
-              <option>Fourth Year</option>
-            </select>
-            {/* Status filter */}
-            <select className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option>All Status</option>
-              <option>Active</option>
-              <option>Inactive</option>
-              <option>On Leave</option>
-            </select>
-            {/* Apply filters button */}
-            <button className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors">
-              Apply Filters
-            </button>
-          </div>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<AddIcon />}
+                  >
+                    Add Student
+                  </Button>
 
-          {/* Table displaying student records */}
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-blue-500 text-white">
-                <tr>
-                  {/* Checkbox for selecting multiple students */}
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase">
-                    <input type="checkbox" className="rounded" />
-                  </th>
-                  {/* Other column headers */}
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase">Student ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase">Age</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase">Course</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase">Year</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {/* Student rows */}
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <input type="checkbox" className="rounded" />
-                  </td>
-                  <td className="px-6 py-4">STU001</td>
-                  <td className="px-6 py-4 flex items-center gap-2">
-                    <img
-                      src="https://avatar.iran.liara.run/public"
-                      alt="Alex Johnson"
-                      className="w-8 h-8 rounded-full"
-                    />
-                    <span>Alex Johnson</span>
-                  </td>
-                  <td className="px-6 py-4">20</td>
-                  <td className="px-6 py-4">Computer Science</td>
-                  <td className="px-6 py-4">Second Year</td>
-                  <td className="px-6 py-4">
-                    <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Active</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-2">
-                      <button className="text-blue-500 hover:text-blue-700">Edit</button>
-                      <button className="text-red-500 hover:text-red-700">Delete</button>
-                    </div>
-                  </td>
-                </tr>
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <input type="checkbox" className="rounded" />
-                  </td>
-                  <td className="px-6 py-4">STU002</td>
-                  <td className="px-6 py-4 flex items-center gap-2">
-                    <img
-                      src="https://avatar.iran.liara.run/public"
-                      alt="Sarah Williams"
-                      className="w-8 h-8 rounded-full"
-                    />
-                    <span>Sarah Williams</span>
-                  </td>
-                  <td className="px-6 py-4">19</td>
-                  <td className="px-6 py-4">Engineering</td>
-                  <td className="px-6 py-4">First Year</td>
-                  <td className="px-6 py-4">
-                    <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">On Leave</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-2">
-                      <button className="text-blue-500 hover:text-blue-700">Edit</button>
-                      <button className="text-red-500 hover:text-red-700">Delete</button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                  <FormControl size="small" sx={{ minWidth: 150 }}>
+                    <InputLabel>Bulk Actions</InputLabel>
+                    <Select
+                      label="Bulk Actions"
+                      defaultValue=""
+                    >
+                      <MenuItem value="">
+                        <em>Select Action</em>
+                      </MenuItem>
+                      <MenuItem value="delete">Delete Selected</MenuItem>
+                      <MenuItem value="update">Update Status</MenuItem>
+                      <MenuItem value="export">Export Selected</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Stack>
+              </Grid>
+            </Grid>
+          </Box>
 
-          {/* Pagination Section */}
-          <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-            <div className="flex-1 flex justify-between sm:hidden">
-              {/* Mobile pagination buttons */}
-              <button className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                Previous
-              </button>
-              <button className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                Next
-              </button>
-            </div>
-            <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm text-gray-700">
-                  Showing <span className="font-medium">1</span> to <span className="font-medium">10</span> of{' '}
-                  <span className="font-medium">97</span> students
-                </p>
-              </div>
-              <div>
-                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                  <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                    Previous
-                  </button>
-                  <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                    1
-                  </button>
-                  <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                    2
-                  </button>
-                  <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                    3
-                  </button>
-                  <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                    Next
-                  </button>
-                </nav>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-  )
+          {/* Filters */}
+          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.default' }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={3}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Course</InputLabel>
+                  <Select
+                    name="course"
+                    value={filters.course}
+                    label="Course"
+                    onChange={handleFilterChange}
+                  >
+                    <MenuItem value="All Courses">All Courses</MenuItem>
+                    <MenuItem value="Computer Science">Computer Science</MenuItem>
+                    <MenuItem value="Engineering">Engineering</MenuItem>
+                    <MenuItem value="Business">Business</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={3}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Year</InputLabel>
+                  <Select
+                    name="year"
+                    value={filters.year}
+                    label="Year"
+                    onChange={handleFilterChange}
+                  >
+                    <MenuItem value="All Years">All Years</MenuItem>
+                    <MenuItem value="First Year">First Year</MenuItem>
+                    <MenuItem value="Second Year">Second Year</MenuItem>
+                    <MenuItem value="Third Year">Third Year</MenuItem>
+                    <MenuItem value="Fourth Year">Fourth Year</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={3}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    name="status"
+                    value={filters.status}
+                    label="Status"
+                    onChange={handleFilterChange}
+                  >
+                    <MenuItem value="All Status">All Status</MenuItem>
+                    <MenuItem value="Active">Active</MenuItem>
+                    <MenuItem value="Inactive">Inactive</MenuItem>
+                    <MenuItem value="On Leave">On Leave</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={3}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                >
+                  Apply Filters
+                </Button>
+              </Grid>
+            </Grid>
+          </Box>
+
+          {/* Table */}
+          <TableContainer sx={{ maxHeight: '60vh' }}>
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow>
+                  <TableCell padding="checkbox" sx={{ bgcolor: 'primary.main', color: 'white' }}>
+                    <Checkbox size="small" sx={{ color: 'white', '&.Mui-checked': { color: 'white' } }} />
+                  </TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Student ID</TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Name</TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Age</TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Course</TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Year</TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Status</TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {students.map((student) => (
+                  <TableRow
+                    key={student.id}
+                    hover
+                    sx={{
+                      '&:last-child td, &:last-child th': { border: 0 },
+                    }}
+                  >
+                    <TableCell padding="checkbox">
+                      <Checkbox size="small" />
+                    </TableCell>
+                    <TableCell>{student.id}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Avatar src={student.avatar} alt={student.name} sx={{ width: 32, height: 32 }} />
+                        <Typography variant="body2">{student.name}</Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>{student.age}</TableCell>
+                    <TableCell>{student.course}</TableCell>
+                    <TableCell>{student.year}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={student.status}
+                        size="small"
+                        color={student.status === "Active" ? "success" : student.status === "Inactive" ? "error" : "warning"}
+                        variant="outlined"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <IconButton size="small" color="primary">
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton size="small" color="error">
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {/* Pagination */}
+          <Box sx={{
+            p: 2,
+            borderTop: 1,
+            borderColor: 'divider',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 2
+          }}>
+            <Typography variant="body2" color="text.secondary">
+              Showing 1 to 10 of 97 students
+            </Typography>
+
+            <Pagination
+              count={10}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+              shape="rounded"
+            />
+          </Box>
+        </Paper>
+      </Container>
+    </Box>
+  );
 }
 
-export default Courses
+export default Courses;

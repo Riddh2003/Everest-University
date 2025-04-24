@@ -10,7 +10,6 @@ import StudentLogin from "./components/studentPortalPage/StudentLogin";
 import AdmissionPage from "./pages/AdmissionPage.jsx";
 import MyProfile from "./components/studentPortalPage/MyProfile.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
-import NewQuery from "./components/adminPage/NewQuery.jsx";
 import Professors from "./components/adminPage/Professors.jsx";
 import Student from "./components/adminPage/Student.jsx";
 import Courses from "./components/adminPage/Courses.jsx";
@@ -28,6 +27,7 @@ import ComputerScience from "./components/Home/Program/ComputerScience.jsx";
 import Management from "./components/Home/Program/Management.jsx";
 import SubjectInfo from "./components/Home/Program/SubjectInfo.jsx";
 import AdmissionsRequest from "./components/adminPage/AdmissionsRequest.jsx";
+import AdminProfile from "./components/adminPage/AdminProfile.jsx";
 
 function App() {
   return (
@@ -65,8 +65,8 @@ function App() {
         <Route path="/adminlogin" element={<AdminLogin />}></Route>
         <Route element={<ProtectedRoutes allowedRole="admin" />}>
           <Route path="/adminportal" element={<AdminPage />}>
-            <Route index element={<NewQuery />} />
-            <Route path="newquery" element={<NewQuery />} />
+            <Route index element={<AdminProfile />} />
+            <Route path="adminprofile" element={<AdminProfile />} />
             <Route path="professors" element={<Professors />} />
             <Route path="student" element={<Student />} />
             <Route path="admissionrequest" element={<AdmissionsRequest />}></Route>

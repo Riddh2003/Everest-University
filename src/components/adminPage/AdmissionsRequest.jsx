@@ -3,6 +3,26 @@ import useTheme, { ThemeProvider } from "../../context/NewContext";
 import { useNavigate } from "react-router-dom";
 import { Flip, toast, ToastContainer } from "react-toastify";
 import axios from "axios";
+import {
+  Box,
+  Container,
+  Paper,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Button,
+  CircularProgress,
+  Stack,
+  Chip
+} from "@mui/material";
+import {
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon
+} from "@mui/icons-material";
 
 const API_URL = "http://localhost:9999/api/private/admin";
 
@@ -86,96 +106,134 @@ const AdmissionsRequest = () => {
 
   return (
     <ThemeProvider>
-      <div className={`flex-1 transition-all duration-300 ${isOpenForSideBar ? 'ml-64' : 'ml-20'}`}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          transition: 'margin 0.3s ease',
+          ml: isOpenForSideBar ? '240px' : '70px',
+        }}
+      >
         <ToastContainer position="top-center" autoClose={3000} transition={Flip} />
-        <div className="bg-gray-100 p-4 md:p-6 min-h-screen">
-          <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8 text-blue-500">
-            Admission Requests
-          </h1>
+        <Box sx={{ bgcolor: 'background.default', p: 3, minHeight: '100vh' }}>
+          <Container maxWidth="xl">
+            <Typography
+              variant="h4"
+              align="center"
+              color="primary"
+              fontWeight="bold"
+              sx={{ mb: 4 }}
+            >
+              Admission Requests
+            </Typography>
 
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-            </div>
-          ) : (
-            <div className="max-w-[90%] mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full divide-y divide-gray-200">
-                  <thead className="bg-blue-500">
-                    <tr>
-                      <th scope="col" className="sticky top-0 z-10 px-6 py-4 text-left text-sm font-semibold text-white tracking-wider">
-                        Full Name
-                      </th>
-                      <th scope="col" className="sticky top-0 z-10 px-6 py-4 text-left text-sm font-semibold text-white tracking-wider">
-                        Email
-                      </th>
-                      <th scope="col" className="sticky top-0 z-10 px-6 py-4 text-left text-sm font-semibold text-white tracking-wider">
-                        Mobile
-                      </th>
-                      <th scope="col" className="sticky top-0 z-10 px-6 py-4 text-center text-sm font-semibold text-white tracking-wider">
-                        Program
-                      </th>
-                      <th scope="col" className="sticky top-0 z-10 px-6 py-4 text-center text-sm font-semibold text-white tracking-wider">
-                        State
-                      </th>
-                      <th scope="col" className="sticky top-0 z-10 px-6 py-4 text-center text-sm font-semibold text-white tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {admissionRequests.length > 0 ? (
-                      admissionRequests.map((request) => (
-                        <tr key={request.registrationId} className="hover:bg-gray-50 transition-colors duration-200">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {`${request.firstName} ${request.middleName} ${request.surName}`}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {request.email}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {request.mobileNo}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                            {request.program}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                            {request.state}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
-                            <div className="flex justify-center gap-3">
-                              <button
-                                onClick={() => handleAdmissionAction(request, "approve")}
-                                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
-                                disabled={actionLoading}
+            {loading ? (
+              <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+                <CircularProgress />
+              </Box>
+            ) : (
+              <Paper
+                elevation={3}
+                sx={{
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  maxWidth: '100%',
+                  mx: 'auto'
+                }}
+              >
+                <TableContainer sx={{ maxHeight: '70vh' }}>
+                  <Table stickyHeader>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Full Name</TableCell>
+                        <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Email</TableCell>
+                        <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Mobile</TableCell>
+                        <TableCell align="center" sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Program</TableCell>
+                        <TableCell align="center" sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>State</TableCell>
+                        <TableCell align="center" sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Actions</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {admissionRequests.length > 0 ? (
+                        admissionRequests.map((request) => (
+                          <TableRow
+                            key={request.registrationId}
+                            hover
+                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                          >
+                            <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                              {`${request.firstName} ${request.middleName} ${request.surName}`}
+                            </TableCell>
+                            <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                              {request.email}
+                            </TableCell>
+                            <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                              {request.mobileNo}
+                            </TableCell>
+                            <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>
+                              <Chip
+                                label={request.program}
+                                color="primary"
+                                variant="outlined"
+                                size="small"
+                              />
+                            </TableCell>
+                            <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>
+                              <Chip
+                                label={request.state}
+                                color={request.state === "Pending" ? "warning" : "success"}
+                                variant="outlined"
+                                size="small"
+                              />
+                            </TableCell>
+                            <TableCell align="center">
+                              <Stack
+                                direction="row"
+                                spacing={1}
+                                justifyContent="center"
                               >
-                                {actionLoading ? "Processing..." : "Approve"}
-                              </button>
-                              <button
-                                onClick={() => handleAdmissionAction(request, "reject")}
-                                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
-                                disabled={actionLoading}
-                              >
-                                {actionLoading ? "Processing..." : "Reject"}
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="6" className="px-6 py-10 text-sm text-gray-500 text-center bg-gray-50">
-                          No admission requests found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+                                <Button
+                                  variant="contained"
+                                  color="success"
+                                  size="small"
+                                  startIcon={<CheckCircleIcon />}
+                                  onClick={() => handleAdmissionAction(request, "approve")}
+                                  disabled={actionLoading}
+                                  sx={{ whiteSpace: 'nowrap' }}
+                                >
+                                  {actionLoading ? "Processing..." : "Approve"}
+                                </Button>
+                                <Button
+                                  variant="contained"
+                                  color="error"
+                                  size="small"
+                                  startIcon={<CancelIcon />}
+                                  onClick={() => handleAdmissionAction(request, "reject")}
+                                  disabled={actionLoading}
+                                  sx={{ whiteSpace: 'nowrap' }}
+                                >
+                                  {actionLoading ? "Processing..." : "Reject"}
+                                </Button>
+                              </Stack>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                            <Typography color="text.secondary">
+                              No admission requests found
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Paper>
+            )}
+          </Container>
+        </Box>
+      </Box>
     </ThemeProvider>
   );
 };

@@ -1,15 +1,46 @@
-import React, { useState, useContext, useEffect } from "react";
-import useTheme, { ThemeProvider } from "../../context/NewContext";
+import React, { useState, useEffect } from "react";
 import StudentsForm from './StudentsForm'; // Import the popup form
 import axios from "axios";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  Box,
+  CircularProgress,
+  IconButton,
+  Tooltip,
+  Chip,
+  Grid,
+  useTheme as useMuiTheme,
+  useMediaQuery
+} from '@mui/material';
+import {
+  Visibility as VisibilityIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Add as AddIcon
+} from '@mui/icons-material';
+import {
+  bluePurple,
+  SectionTitle,
+  StyledButton,
+  CardContainer,
+  ContentCard,
+  PageContainer
+} from './AdminProfile';
 
 const Student = () => {
-  // const [students, setStudents] = useState(demoDataArray); // State to hold demo data
-  const [students, setStudents] = useState([]); // State to hold demo data
+  const [students, setStudents] = useState([]);
   const [openIndex, setOpenIndex] = useState(null); // Track which dropdown is open
   const [isPopupOpen, setIsPopupOpen] = useState(false); // Track popup visibility
   const [currentStudent, setCurrentStudent] = useState(null); // Track current student data for editing
   const [loading, setLoading] = useState(true);
+  const muiTheme = useMuiTheme();
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'));
 
   const toggleDropdown = (index) => {
     if (openIndex === index) {
@@ -46,7 +77,6 @@ const Student = () => {
   const fetchStudentData = async () => {
     try {
       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-      console.log("Token : ", token);
 
       if (!token) {
         console.error("No token found.");
@@ -54,7 +84,6 @@ const Student = () => {
         return;
       }
 
-      // Try using the proxy configured in vite.config.js
       const response = await axios.get(
         "http://localhost:9999/api/private/student/getallstudent",
         {
@@ -66,11 +95,9 @@ const Student = () => {
         }
       );
 
-      console.log(response.data.data);
       setStudents(response.data.data);
       setLoading(false);
-    } catch (error) 
-    {
+    } catch (error) {
       console.error("Error fetching students:", error);
       setLoading(false);
     }
@@ -81,88 +108,253 @@ const Student = () => {
     fetchStudentData();
   }, []);
 
-  const { isOpenForSideBar } = useTheme();
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="80vh">
+        <CircularProgress sx={{ color: bluePurple.main }} />
+      </Box>
+    );
+  }
 
   return (
-    <ThemeProvider value={{ isOpenForSideBar }}>
-      <div
-        className={`flex-1 bg-gray-100 p-6 transition-all duration-300 ${isOpenForSideBar ? "ml-64" : "ml-20"
-          }`}
-      >
-        <h1 className="text-3xl font-bold text-center mb-8 text-blue-500">Students</h1>
-        <div className="overflow-x-auto">
-          <table className="min-w-full table-auto bg-white border-separate border border-gray-200 rounded-lg shadow-md">
-            {/* Table Header */}
-            <thead className="bg-blue-500 text-white">
-              <tr>
-                <th className="px-4 py-2 text-left">Enrollment_ID</th>
-                <th className="px-4 py-2 text-left">Surname</th>
-                <th className="px-4 py-2 text-left">Firstname</th>
-                <th className="px-4 py-2 text-left">Middlename</th>
-                <th className="px-4 py-2 text-left">Mobile</th>
-                <th className="px-4 py-2 text-left">Email</th>
-                <th className="px-4 py-2 text-left">Gender</th>
-                <th className="px-4 py-2 text-left">DOB</th>
-                <th className="px-4 py-2 text-center">Program</th>
-                <th className="px-4 py-2 text-center">Degree</th>
-                <th className="px-4 py-2 text-center">Degree Name</th>
-                <th className="px-4 py-2 text-center">Current Sem</th>
-                <th className="px-4 py-2 text-center">Current Year</th>
-                <th className="px-4 py-2 text-center">Action</th>
-              </tr>
-            </thead>
+    <PageContainer>
+      {/* Page Title and Add Button */}
+      <Box mb={3} display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap">
+        <SectionTitle variant={isMobile ? "h5" : "h4"}>
+          Students
+        </SectionTitle>
+        <StyledButton
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => {
+            setCurrentStudent(null); // Reset student data for new entry
+            setIsPopupOpen(true);
+          }}
+          sx={{ mt: isMobile ? 1 : 0 }}
+        >
+          Add Student
+        </StyledButton>
+      </Box>
 
-            {/* Table Body */}
-            <tbody>
-              {students && students.length > 0 ? (
-                students.map((student, index) => (
-                  <tr
-                    key={index}
-                    className="odd:bg-gray-50 even:bg-gray-100 hover:bg-gray-200"
-                  >
-                    <td className="px-4 py-2 text-nowrap">{student.enrollmentId}</td>
-                    <td className="px-4 py-2 text-nowrap">{student.surName}</td>
-                    <td className="px-4 py-2 text-nowrap">{student.firstName}</td>
-                    <td className="px-4 py-2 text-nowrap">{student.middleName}</td>
-                    <td className="px-4 py-2 text-nowrap">{student.mobileNo}</td>
-                    <td className="px-4 py-2 text-nowrap">{student.email}</td>
-                    <td className="px-4 py-2 text-nowrap">{student.gender}</td>
-                    <td className="px-4 py-2 text-nowrap">{student.dateOfBirth}</td>
-                    <td className="px-4 py-2 text-nowrap">{student.program}</td>
-                    <td className="px-4 py-2 text-nowrap">{student.degree}</td>
-                    <td className="px-4 py-2 text-nowrap">{student.degreeName}</td>
-                    <td className="px-4 py-2 text-nowrap">{student.currentSem}</td>
-                    <td className="px-4 py-2 text-nowrap">{student.currentYear}</td>
+      {/* Main content */}
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <CardContainer>
+            <ContentCard sx={{ p: { xs: 1, sm: 2 } }}>
+              <TableContainer
+                sx={{
+                  overflow: 'auto',
+                  maxHeight: 'calc(100vh - 180px)',
+                  '&::-webkit-scrollbar': {
+                    width: '8px',
+                    height: '8px',
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: 'rgba(106, 90, 205, 0.3)',
+                    borderRadius: '4px',
+                    '&:hover': {
+                      backgroundColor: 'rgba(106, 90, 205, 0.5)',
+                    }
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    backgroundColor: 'rgba(0,0,0,0.05)',
+                    borderRadius: '4px',
+                  },
+                }}
+              >
+                <Table stickyHeader aria-label="students table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{
+                        fontWeight: 'bold',
+                        background: bluePurple.gradient,
+                        color: 'white',
+                        whiteSpace: 'nowrap'
+                      }}>Enrollment ID</TableCell>
+                      <TableCell sx={{
+                        fontWeight: 'bold',
+                        background: bluePurple.gradient,
+                        color: 'white',
+                        whiteSpace: 'nowrap'
+                      }}>Surname</TableCell>
+                      <TableCell sx={{
+                        fontWeight: 'bold',
+                        background: bluePurple.gradient,
+                        color: 'white',
+                        whiteSpace: 'nowrap'
+                      }}>Firstname</TableCell>
+                      <TableCell sx={{
+                        fontWeight: 'bold',
+                        background: bluePurple.gradient,
+                        color: 'white',
+                        whiteSpace: 'nowrap'
+                      }}>Middlename</TableCell>
+                      <TableCell sx={{
+                        fontWeight: 'bold',
+                        background: bluePurple.gradient,
+                        color: 'white',
+                        whiteSpace: 'nowrap'
+                      }}>Mobile</TableCell>
+                      <TableCell sx={{
+                        fontWeight: 'bold',
+                        background: bluePurple.gradient,
+                        color: 'white',
+                        whiteSpace: 'nowrap'
+                      }}>Email</TableCell>
+                      <TableCell sx={{
+                        fontWeight: 'bold',
+                        background: bluePurple.gradient,
+                        color: 'white',
+                        whiteSpace: 'nowrap'
+                      }}>Gender</TableCell>
+                      <TableCell sx={{
+                        fontWeight: 'bold',
+                        background: bluePurple.gradient,
+                        color: 'white',
+                        whiteSpace: 'nowrap'
+                      }}>DOB</TableCell>
+                      <TableCell sx={{
+                        fontWeight: 'bold',
+                        background: bluePurple.gradient,
+                        color: 'white',
+                        whiteSpace: 'nowrap'
+                      }}>Program</TableCell>
+                      <TableCell sx={{
+                        fontWeight: 'bold',
+                        background: bluePurple.gradient,
+                        color: 'white',
+                        whiteSpace: 'nowrap'
+                      }}>Degree</TableCell>
+                      <TableCell sx={{
+                        fontWeight: 'bold',
+                        background: bluePurple.gradient,
+                        color: 'white',
+                        whiteSpace: 'nowrap'
+                      }}>Degree Name</TableCell>
+                      <TableCell sx={{
+                        fontWeight: 'bold',
+                        background: bluePurple.gradient,
+                        color: 'white',
+                        whiteSpace: 'nowrap'
+                      }}>Current Sem</TableCell>
+                      <TableCell sx={{
+                        fontWeight: 'bold',
+                        background: bluePurple.gradient,
+                        color: 'white',
+                        whiteSpace: 'nowrap'
+                      }}>Current Year</TableCell>
+                      <TableCell sx={{
+                        fontWeight: 'bold',
+                        background: bluePurple.gradient,
+                        color: 'white',
+                        textAlign: 'center',
+                        whiteSpace: 'nowrap'
+                      }}>Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {students && students.length > 0 ? (
+                      students.map((student, index) => (
+                        <TableRow
+                          key={index}
+                          sx={{
+                            '&:nth-of-type(odd)': { bgcolor: bluePurple.lighter },
+                            '&:hover': { bgcolor: 'rgba(106, 90, 205, 0.08)' },
+                          }}
+                        >
+                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.enrollmentId}</TableCell>
+                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.surName}</TableCell>
+                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.firstName}</TableCell>
+                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.middleName}</TableCell>
+                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.mobileNo}</TableCell>
+                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.email}</TableCell>
+                          <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                            <Chip
+                              label={student.gender}
+                              size="small"
+                              sx={{
+                                color: student.gender === 'Male' ? bluePurple.dark : '#d32f2f',
+                                borderColor: student.gender === 'Male' ? bluePurple.main : '#f44336',
+                                backgroundColor: student.gender === 'Male' ? 'rgba(106, 90, 205, 0.1)' : 'rgba(244, 67, 54, 0.1)'
+                              }}
+                              variant="outlined"
+                            />
+                          </TableCell>
+                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.dateOfBirth}</TableCell>
+                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.program}</TableCell>
+                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.degree}</TableCell>
+                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.degreeName}</TableCell>
+                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.currentSem}</TableCell>
+                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.currentYear}</TableCell>
+                          <TableCell sx={{ whiteSpace: 'nowrap', textAlign: 'center' }}>
+                            <Tooltip title="View">
+                              <IconButton
+                                size="small"
+                                sx={{
+                                  color: bluePurple.main,
+                                  '&:hover': {
+                                    backgroundColor: bluePurple.lighter,
+                                  }
+                                }}
+                              >
+                                <VisibilityIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Edit">
+                              <IconButton
+                                size="small"
+                                sx={{
+                                  color: bluePurple.dark,
+                                  '&:hover': {
+                                    backgroundColor: bluePurple.lighter,
+                                  }
+                                }}
+                                onClick={() => openPopup(index)}
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete">
+                              <IconButton
+                                size="small"
+                                sx={{
+                                  color: '#d32f2f',
+                                  '&:hover': {
+                                    backgroundColor: 'rgba(244, 67, 54, 0.08)',
+                                  }
+                                }}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={14} sx={{ textAlign: 'center', py: 3 }}>
+                          <Typography color="text.secondary">No students found.</Typography>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </ContentCard>
+          </CardContainer>
+        </Grid>
+      </Grid>
 
-                    {/* Action Button */}
-                    <td className="px-4 py-2 text-center text-nowrap">
-                      <button className="text-blue-500 hover:text-blue-700">View</button> | <button className="text-blue-500 hover:text-blue-700">Edit</button> | <button className="text-blue-500 hover:text-blue-700"> Delete</button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="13"
-                    className="px-4 py-2 text-center text-gray-500"
-                  >
-                    No students found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        {isPopupOpen && (
-          <StudentsForm
-            studentData={currentStudent}
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-            onClose={closePopup}
-          />
-        )}
-      </div>
-    </ThemeProvider>
+      {isPopupOpen && (
+        <StudentsForm
+          studentData={currentStudent}
+          onChange={handleChange}
+          onSubmit={handleSubmit}
+          onClose={closePopup}
+          themeColor={bluePurple}
+        />
+      )}
+    </PageContainer>
   );
 };
 

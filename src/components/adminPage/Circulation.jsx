@@ -1,12 +1,47 @@
-import React, { useState } from 'react'
-import useTheme from '../../context/NewContext'; // Importing theme context for sidebar state management
+import React, { useState } from 'react';
+import useTheme from '../../context/NewContext';
+import {
+  Box,
+  Container,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Checkbox,
+  InputAdornment,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Grid,
+  Chip,
+  IconButton,
+  Pagination,
+  Stack,
+  Divider
+} from '@mui/material';
+import {
+  Search as SearchIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon
+} from '@mui/icons-material';
 
 function Circulation() {
-  const { isOpenForSideBar } = useTheme(); // Access the theme context to check if sidebar is open
-
-  // State variables for managing search input and selected bulk action
+  const { isOpenForSideBar } = useTheme();
   const [search, setSearch] = useState('');
-  const [selectedBulkAction, setSelectedBulkAction] = useState('Bulk Actions');
+  const [page, setPage] = useState(1);
+  const [filters, setFilters] = useState({
+    category: 'All Categories',
+    location: 'All Locations',
+    status: 'All Status'
+  });
 
   // Example data for events
   const events = [
@@ -34,181 +69,271 @@ function Circulation() {
     },
   ];
 
+  const handleFilterChange = (event) => {
+    const { name, value } = event.target;
+    setFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handlePageChange = (event, value) => {
+    setPage(value);
+  };
+
+  const filteredEvents = events.filter(event =>
+    event.name.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <>
-      <div className={`flex-1 bg-gray-100 p-6 transition-all duration-300 ${isOpenForSideBar ? 'ml-64' : 'ml-20'}`}>
-        {/* Event Management Section */}
-        <section id="events" className="p-6">
-          <div className="bg-white border border-gray-200 rounded-lg shadow-lg">
-            {/* Table Header */}
-            <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <h2 className="text-lg font-semibold text-blue-500">Event Management</h2>
-              <div className="flex flex-col lg:flex-row gap-2 w-full sm:w-auto">
-                {/* Search Bar */}
-                <div className="relative w-full sm:w-64">
-                  <input
-                    type="text"
+    <Box
+      sx={{
+        flexGrow: 1,
+        p: 3,
+        bgcolor: 'background.default',
+        transition: 'margin 0.3s ease',
+        ml: isOpenForSideBar ? '240px' : '70px',
+      }}
+    >
+      <Container maxWidth="xl">
+        <Paper elevation={3} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+          {/* Header */}
+          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} md={4}>
+                <Typography variant="h6" color="primary" fontWeight="medium">
+                  Event Management
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} md={8}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                  <TextField
                     placeholder="Search events..."
-                    className="pl-8 pr-4 py-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    size="small"
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)} // Update search state on input change
+                    onChange={(e) => setSearch(e.target.value)}
+                    sx={{ flexGrow: 1 }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
+                    }}
                   />
-                  <svg className="w-4 h-4 absolute left-2.5 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                {/* Add Event Button */}
-                <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors mt-2 sm:mt-0">
-                  Add Event
-                </button>
-                {/* Bulk Actions Dropdown */}
-                <select
-                  className="px-4 py-2 border border-gray-300 rounded mt-2 sm:mt-0 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={selectedBulkAction}
-                  onChange={(e) => setSelectedBulkAction(e.target.value)} // Update bulk action state
+
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<AddIcon />}
+                  >
+                    Add Event
+                  </Button>
+
+                  <FormControl size="small" sx={{ minWidth: 150 }}>
+                    <InputLabel>Bulk Actions</InputLabel>
+                    <Select
+                      label="Bulk Actions"
+                      defaultValue=""
+                    >
+                      <MenuItem value="">
+                        <em>Select Action</em>
+                      </MenuItem>
+                      <MenuItem value="delete">Delete Selected</MenuItem>
+                      <MenuItem value="update">Update Status</MenuItem>
+                      <MenuItem value="export">Export Events</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Stack>
+              </Grid>
+            </Grid>
+          </Box>
+
+          {/* Filters */}
+          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.default' }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={3}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Category</InputLabel>
+                  <Select
+                    name="category"
+                    value={filters.category}
+                    label="Category"
+                    onChange={handleFilterChange}
+                  >
+                    <MenuItem value="All Categories">All Categories</MenuItem>
+                    <MenuItem value="Academic">Academic</MenuItem>
+                    <MenuItem value="Cultural">Cultural</MenuItem>
+                    <MenuItem value="Sports">Sports</MenuItem>
+                    <MenuItem value="Workshop">Workshop</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={3}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Location</InputLabel>
+                  <Select
+                    name="location"
+                    value={filters.location}
+                    label="Location"
+                    onChange={handleFilterChange}
+                  >
+                    <MenuItem value="All Locations">All Locations</MenuItem>
+                    <MenuItem value="Main Hall">Main Hall</MenuItem>
+                    <MenuItem value="Auditorium">Auditorium</MenuItem>
+                    <MenuItem value="Sports Complex">Sports Complex</MenuItem>
+                    <MenuItem value="Conference Room">Conference Room</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={3}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    name="status"
+                    value={filters.status}
+                    label="Status"
+                    onChange={handleFilterChange}
+                  >
+                    <MenuItem value="All Status">All Status</MenuItem>
+                    <MenuItem value="Scheduled">Scheduled</MenuItem>
+                    <MenuItem value="Ongoing">Ongoing</MenuItem>
+                    <MenuItem value="Completed">Completed</MenuItem>
+                    <MenuItem value="Cancelled">Cancelled</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={3}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
                 >
-                  <option>Bulk Actions</option>
-                  <option>Delete Selected</option>
-                  <option>Update Status</option>
-                  <option>Export Events</option>
-                </select>
-              </div>
-            </div>
+                  Apply Filters
+                </Button>
+              </Grid>
+            </Grid>
+          </Box>
 
-            {/* Filters */}
-            <div className="p-4 border-b border-gray-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <select className="px-4 py-2 border border-gray-300 rounded w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option>All Categories</option>
-                <option>Academic</option>
-                <option>Cultural</option>
-                <option>Sports</option>
-                <option>Workshop</option>
-              </select>
-              <select className="px-4 py-2 border border-gray-300 rounded w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option>All Locations</option>
-                <option>Main Hall</option>
-                <option>Auditorium</option>
-                <option>Sports Complex</option>
-                <option>Conference Room</option>
-              </select>
-              <select className="px-4 py-2 border border-gray-300 rounded w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option>All Status</option>
-                <option>Scheduled</option>
-                <option>Ongoing</option>
-                <option>Completed</option>
-                <option>Cancelled</option>
-              </select>
-              {/* Apply Filters Button */}
-              <button className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors w-full sm:w-auto mt-2 sm:mt-0">
-                Apply Filters
-              </button>
-            </div>
+          {/* Table */}
+          <TableContainer sx={{ maxHeight: '60vh' }}>
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow>
+                  <TableCell padding="checkbox" sx={{ bgcolor: 'primary.main', color: 'white' }}>
+                    <Checkbox size="small" sx={{ color: 'white', '&.Mui-checked': { color: 'white' } }} />
+                  </TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Event ID</TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Event Name</TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Date</TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Location</TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Capacity</TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Status</TableCell>
+                  <TableCell align="center" sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Actions</TableCell>
+                </TableRow>
+              </TableHead>
 
-            {/* Table of Events */}
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-blue-500 text-white">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase">
-                      <input type="checkbox" className="rounded" /> {/* Checkbox for selecting events */}
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase">Event ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase">Event Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase">Location</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase">Capacity</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {/* Event Rows */}
-                  {events
-                    .filter((event) => event.name.toLowerCase().includes(search.toLowerCase())) // Filter events by search input
-                    .map((event) => (
-                      <tr className="hover:bg-gray-50" key={event.id}>
-                        <td className="px-6 py-4"><input type="checkbox" className="rounded" /></td>
-                        <td className="px-6 py-4">{event.id}</td>
-                        <td className="px-6 py-4">
-                          <div className="font-medium">{event.name}</div>
-                          <div className="text-sm text-gray-500">{event.department}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div>{event.date}</div>
-                          <div className="text-sm text-gray-500">{event.time}</div>
-                        </td>
-                        <td className="px-6 py-4">{event.location}</td>
-                        <td className="px-6 py-4">
-                          <div>{event.capacity} seats</div>
-                          <div className="text-sm text-green-600">{event.registered} registered</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span
-                            className={`px-2 py-1 text-xs rounded-full ${event.status === 'Scheduled'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-yellow-100 text-yellow-800'
-                              }`}
-                          >
-                            {event.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex gap-2">
-                            <button className="text-blue-500 hover:text-blue-700">Edit</button>
-                            <button className="text-red-500 hover:text-red-700">Delete</button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
+              <TableBody>
+                {filteredEvents.map((event) => (
+                  <TableRow
+                    key={event.id}
+                    hover
+                    sx={{
+                      '&:last-child td, &:last-child th': { border: 0 },
+                    }}
+                  >
+                    <TableCell padding="checkbox">
+                      <Checkbox size="small" />
+                    </TableCell>
+                    <TableCell>{event.id}</TableCell>
+                    <TableCell>
+                      <Typography variant="body2" fontWeight="medium">
+                        {event.name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {event.department}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {event.date}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {event.time}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{event.location}</TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {event.capacity} seats
+                      </Typography>
+                      <Typography variant="caption" color="success.main" fontWeight="medium">
+                        {event.registered} registered
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={event.status}
+                        size="small"
+                        color={event.status === "Scheduled" ? "info" : "warning"}
+                        variant="outlined"
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+                        <IconButton size="small" color="primary">
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton size="small" color="error">
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
 
-            {/* Pagination */}
-            <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-              <div className="flex-1 flex justify-between sm:hidden">
-                {/* Mobile Pagination */}
-                <button className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                  Previous
-                </button>
-                <button className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                  Next
-                </button>
-              </div>
-              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                {/* Desktop Pagination */}
-                <div>
-                  <p className="text-sm text-gray-700">
-                    Showing <span className="font-medium">1</span> to <span className="font-medium">10</span> of{' '}
-                    <span className="font-medium">24</span> events
-                  </p>
-                </div>
-                <div>
-                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                    <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                      Previous
-                    </button>
-                    <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                      1
-                    </button>
-                    <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                      2
-                    </button>
-                    <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                      3
-                    </button>
-                    <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                      Next
-                    </button>
-                  </nav>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-    </>
-  )
+                {filteredEvents.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8} sx={{ textAlign: 'center', py: 3 }}>
+                      <Typography color="text.secondary">No events found.</Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {/* Pagination */}
+          <Box sx={{
+            p: 2,
+            borderTop: 1,
+            borderColor: 'divider',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 2
+          }}>
+            <Typography variant="body2" color="text.secondary">
+              Showing 1 to {filteredEvents.length} of 24 events
+            </Typography>
+
+            <Pagination
+              count={3}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+              shape="rounded"
+            />
+          </Box>
+        </Paper>
+      </Container>
+    </Box>
+  );
 }
 
 export default Circulation;
