@@ -151,7 +151,7 @@ const AdminProfile = () => {
     };
 
     return (
-        <div className="w-full h-screen bg-white p-4 md:p-6 overflow-auto">
+        <div className="w-full bg-white p-4 md:p-6 overflow-auto">
             <div className="bg-white shadow-lg rounded-lg overflow-hidden max-w-4xl mx-auto">
                 <div className="bg-[#5e19f3] p-6">
                     <div className="flex flex-col md:flex-row items-center justify-between">

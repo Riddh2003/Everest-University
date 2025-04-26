@@ -1,28 +1,8 @@
 import React, { useState, useEffect } from "react";
-import useTheme, { ThemeProvider } from "../../context/NewContext";
+import useTheme from "../../context/NewContext";
 import { useNavigate } from "react-router-dom";
 import { Flip, toast, ToastContainer } from "react-toastify";
 import axios from "axios";
-import {
-  Box,
-  Container,
-  Paper,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-  CircularProgress,
-  Stack,
-  Chip
-} from "@mui/material";
-import {
-  CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon
-} from "@mui/icons-material";
 
 const API_URL = "http://localhost:9999/api/private/admin";
 
@@ -105,136 +85,97 @@ const AdmissionsRequest = () => {
   }, []);
 
   return (
-    <ThemeProvider>
-      <Box
-        sx={{
-          flexGrow: 1,
-          transition: 'margin 0.3s ease',
-          ml: isOpenForSideBar ? '240px' : '70px',
-        }}
-      >
-        <ToastContainer position="top-center" autoClose={3000} transition={Flip} />
-        <Box sx={{ bgcolor: 'background.default', p: 3, minHeight: '100vh' }}>
-          <Container maxWidth="xl">
-            <Typography
-              variant="h4"
-              align="center"
-              color="primary"
-              fontWeight="bold"
-              sx={{ mb: 4 }}
-            >
-              Admission Requests
-            </Typography>
+    <div className="w-full">
+      <ToastContainer position="top-center" autoClose={3000} transition={Flip} />
 
-            {loading ? (
-              <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
-                <CircularProgress />
-              </Box>
-            ) : (
-              <Paper
-                elevation={3}
-                sx={{
-                  borderRadius: 2,
-                  overflow: 'hidden',
-                  maxWidth: '100%',
-                  mx: 'auto'
-                }}
-              >
-                <TableContainer sx={{ maxHeight: '70vh' }}>
-                  <Table stickyHeader>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Full Name</TableCell>
-                        <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Email</TableCell>
-                        <TableCell sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Mobile</TableCell>
-                        <TableCell align="center" sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Program</TableCell>
-                        <TableCell align="center" sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>State</TableCell>
-                        <TableCell align="center" sx={{ bgcolor: 'primary.main', color: 'white', fontWeight: 'bold' }}>Actions</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {admissionRequests.length > 0 ? (
-                        admissionRequests.map((request) => (
-                          <TableRow
-                            key={request.registrationId}
-                            hover
-                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                          >
-                            <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                              {`${request.firstName} ${request.middleName} ${request.surName}`}
-                            </TableCell>
-                            <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                              {request.email}
-                            </TableCell>
-                            <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                              {request.mobileNo}
-                            </TableCell>
-                            <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>
-                              <Chip
-                                label={request.program}
-                                color="primary"
-                                variant="outlined"
-                                size="small"
-                              />
-                            </TableCell>
-                            <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>
-                              <Chip
-                                label={request.state}
-                                color={request.state === "Pending" ? "warning" : "success"}
-                                variant="outlined"
-                                size="small"
-                              />
-                            </TableCell>
-                            <TableCell align="center">
-                              <Stack
-                                direction="row"
-                                spacing={1}
-                                justifyContent="center"
+      <div className="min-h-screen px-4 py-6">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-2xl md:text-3xl font-bold text-indigo-700 text-center mb-8">
+            Admission Requests
+          </h1>
+
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gradient-to-r from-indigo-600 to-purple-600">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Full Name</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Email</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Mobile</th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">Program</th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">State</th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {admissionRequests.length > 0 ? (
+                      admissionRequests.map((request) => (
+                        <tr
+                          key={request.registrationId}
+                          className="hover:bg-gray-50"
+                        >
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-800">
+                            {`${request.firstName} ${request.middleName} ${request.surName}`}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-800">
+                            {request.email}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-800">
+                            {request.mobileNo}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
+                            <span className="px-2 py-1 text-xs font-medium text-indigo-700 bg-indigo-100 rounded-full">
+                              {request.program}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
+                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${request.state === "Pending"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-green-100 text-green-800"
+                              }`}>
+                              {request.state}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
+                            <div className="flex justify-center space-x-2">
+                              <button
+                                className="px-3 py-1 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
+                                onClick={() => handleAdmissionAction(request, "approve")}
+                                disabled={actionLoading}
                               >
-                                <Button
-                                  variant="contained"
-                                  color="success"
-                                  size="small"
-                                  startIcon={<CheckCircleIcon />}
-                                  onClick={() => handleAdmissionAction(request, "approve")}
-                                  disabled={actionLoading}
-                                  sx={{ whiteSpace: 'nowrap' }}
-                                >
-                                  {actionLoading ? "Processing..." : "Approve"}
-                                </Button>
-                                <Button
-                                  variant="contained"
-                                  color="error"
-                                  size="small"
-                                  startIcon={<CancelIcon />}
-                                  onClick={() => handleAdmissionAction(request, "reject")}
-                                  disabled={actionLoading}
-                                  sx={{ whiteSpace: 'nowrap' }}
-                                >
-                                  {actionLoading ? "Processing..." : "Reject"}
-                                </Button>
-                              </Stack>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                            <Typography color="text.secondary">
-                              No admission requests found
-                            </Typography>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Paper>
-            )}
-          </Container>
-        </Box>
-      </Box>
-    </ThemeProvider>
+                                {actionLoading ? "Processing..." : "Approve"}
+                              </button>
+                              <button
+                                className="px-3 py-1 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
+                                onClick={() => handleAdmissionAction(request, "reject")}
+                                disabled={actionLoading}
+                              >
+                                {actionLoading ? "Processing..." : "Reject"}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={6} className="px-4 py-6 text-sm text-center text-gray-500">
+                          No admission requests found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 

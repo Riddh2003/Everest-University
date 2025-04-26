@@ -148,7 +148,7 @@ function Professors() {
   // If in view mode, show detailed faculty info
   if (viewMode && selectedFaculty) {
     return (
-      <div className="flex-grow p-6">
+      <div className="p-6">
         <div className="max-w-[1000px] mx-auto bg-white rounded-lg shadow-md overflow-hidden">
           <div className="p-4 border-b border-gray-200 flex justify-between items-center">
             <h2 className="text-xl font-medium text-[#621df6]">Faculty Details</h2>
@@ -242,196 +242,194 @@ function Professors() {
   }
 
   return (
-    <div className="flex-grow p-6">
-      <div className="max-w-[1400px] mx-auto">
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          {/* Header */}
-          <div className="p-4 border-b border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-              <div className="md:col-span-1">
-                <h2 className="text-xl font-medium text-[#621df6]">
-                  Faculty Records
-                </h2>
-              </div>
+    <div className="w-full">
+      <div className="bg-white shadow-md rounded-lg">
+        {/* Header */}
+        <div className="p-4 border-b border-gray-200">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            <div className="md:col-span-1">
+              <h2 className="text-xl font-medium text-[#621df6]">
+                Faculty Records
+              </h2>
+            </div>
 
-              <div className="md:col-span-2">
-                <div className="flex flex-wrap gap-3">
-                  <div className="relative flex-grow">
-                    <input
-                      type="text"
-                      placeholder="Search faculty..."
-                      className="w-full px-4 py-2 pl-9 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#621df6] focus:border-transparent"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </div>
-                  </div>
-
-                  <button
-                    className="flex items-center gap-1 px-4 py-2 bg-[#621df6] text-white rounded-md hover:bg-[#5019d0] transition-colors"
-                    onClick={() => openPopup()}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+            <div className="md:col-span-2">
+              <div className="flex flex-wrap gap-3">
+                <div className="relative flex-grow">
+                  <input
+                    type="text"
+                    placeholder="Search faculty..."
+                    className="w-full px-4 py-2 pl-9 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#621df6] focus:border-transparent"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                    Add Faculty
-                  </button>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Department Filter */}
-          <div className="p-4 border-b border-gray-200 bg-gray-50">
-            <div className="flex flex-wrap gap-4 items-end">
-              <div className="w-full md:w-64">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#621df6] focus:border-transparent"
-                  value={filters.department}
-                  onChange={(e) => setFilters({ ...filters, department: e.target.value })}
+                <button
+                  className="flex items-center gap-1 px-4 py-2 bg-[#621df6] text-white rounded-md hover:bg-[#5019d0] transition-colors"
+                  onClick={() => openPopup()}
                 >
-                  <option value="All Departments">All Departments</option>
-                  <option value="Computer Science">Computer Science</option>
-                  <option value="Engineering">Engineering</option>
-                  <option value="Business">Business</option>
-                  <option value="Arts">Arts</option>
-                </select>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                  </svg>
+                  Add Faculty
+                </button>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto max-h-[60vh]">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50 sticky top-0">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Profile</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-
-              <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedFaculty.map((faculty, index) => (
-                  <tr
-                    key={faculty.id || index}
-                    className="hover:bg-gray-50"
-                  >
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          {faculty.profilePicture ? (
-                            <img
-                              src={faculty.profilePicture}
-                              alt={faculty.name}
-                              className="h-10 w-10 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="h-10 w-10 rounded-full bg-[#621df6] text-white flex items-center justify-center text-xl">
-                              {faculty.gender === 'Male' ? '👨‍🏫' : faculty.gender === 'Female' ? '👩‍🏫' : '🧑‍🏫'}
-                            </div>
-                          )}
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{faculty.name}</div>
-                          <div className="text-sm text-gray-500">{faculty.email}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{faculty.department}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{faculty.role || 'N/A'}</td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs rounded-full ${faculty.status === "Active"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                          }`}
-                      >
-                        {faculty.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-center">
-                      <div className="flex justify-center space-x-2">
-                        <button
-                          className="p-1 text-[#621df6] hover:bg-[#621df6]/10 rounded-full"
-                          onClick={() => viewFaculty(faculty)}
-                          title="View Details"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                            <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-
-                {paginatedFaculty.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
-                      No faculty found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          <div className="p-4 border-t border-gray-200 flex flex-wrap justify-between items-center gap-4">
-            <p className="text-sm text-gray-500">
-              Showing {paginatedFaculty.length > 0 ? startIndex + 1 : 0} to {Math.min(startIndex + rowsPerPage, filteredFaculty.length)} of {filteredFaculty.length} faculty members
-            </p>
-
-            <div className="flex space-x-2">
-              <button
-                onClick={() => handlePageChange(Math.max(1, page - 1))}
-                disabled={page === 1}
-                className={`px-3 py-1 rounded-md ${page === 1
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-white text-[#621df6] border border-gray-300 hover:bg-gray-50"
-                  }`}
+        {/* Department Filter */}
+        <div className="p-4 border-b border-gray-200 bg-gray-50">
+          <div className="flex flex-wrap gap-4 items-end">
+            <div className="w-full md:w-64">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+              <select
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#621df6] focus:border-transparent"
+                value={filters.department}
+                onChange={(e) => setFilters({ ...filters, department: e.target.value })}
               >
-                Previous
-              </button>
+                <option value="All Departments">All Departments</option>
+                <option value="Computer Science">Computer Science</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Business">Business</option>
+                <option value="Arts">Arts</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
-              <div className="flex space-x-1">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const pageNum = i + Math.max(1, Math.min(page - 2, totalPages - 4));
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => handlePageChange(pageNum)}
-                      className={`px-3 py-1 rounded-md ${pageNum === page
-                        ? "bg-[#621df6] text-white"
-                        : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+        {/* Table */}
+        <div className="overflow-x-auto max-h-[60vh]">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50 sticky top-0">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Profile</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody className="bg-white divide-y divide-gray-200">
+              {paginatedFaculty.map((faculty, index) => (
+                <tr
+                  key={faculty.id || index}
+                  className="hover:bg-gray-50"
+                >
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10">
+                        {faculty.profilePicture ? (
+                          <img
+                            src={faculty.profilePicture}
+                            alt={faculty.name}
+                            className="h-10 w-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded-full bg-[#621df6] text-white flex items-center justify-center text-xl">
+                            {faculty.gender === 'Male' ? '👨‍🏫' : faculty.gender === 'Female' ? '👩‍🏫' : '🧑‍🏫'}
+                          </div>
+                        )}
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">{faculty.name}</div>
+                        <div className="text-sm text-gray-500">{faculty.email}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{faculty.department}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{faculty.role || 'N/A'}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs rounded-full ${faculty.status === "Active"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800"
                         }`}
                     >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-              </div>
+                      {faculty.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-center">
+                    <div className="flex justify-center space-x-2">
+                      <button
+                        className="p-1 text-[#621df6] hover:bg-[#621df6]/10 rounded-full"
+                        onClick={() => viewFaculty(faculty)}
+                        title="View Details"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                          <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
 
-              <button
-                onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
-                disabled={page === totalPages}
-                className={`px-3 py-1 rounded-md ${page === totalPages
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-white text-[#621df6] border border-gray-300 hover:bg-gray-50"
-                  }`}
-              >
-                Next
-              </button>
+              {paginatedFaculty.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                    No faculty found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="p-4 border-t border-gray-200 flex flex-wrap justify-between items-center gap-4">
+          <p className="text-sm text-gray-500">
+            Showing {paginatedFaculty.length > 0 ? startIndex + 1 : 0} to {Math.min(startIndex + rowsPerPage, filteredFaculty.length)} of {filteredFaculty.length} faculty members
+          </p>
+
+          <div className="flex space-x-2">
+            <button
+              onClick={() => handlePageChange(Math.max(1, page - 1))}
+              disabled={page === 1}
+              className={`px-3 py-1 rounded-md ${page === 1
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-white text-[#621df6] border border-gray-300 hover:bg-gray-50"
+                }`}
+            >
+              Previous
+            </button>
+
+            <div className="flex space-x-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                const pageNum = i + Math.max(1, Math.min(page - 2, totalPages - 4));
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum)}
+                    className={`px-3 py-1 rounded-md ${pageNum === page
+                      ? "bg-[#621df6] text-white"
+                      : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                      }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
             </div>
+
+            <button
+              onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
+              disabled={page === totalPages}
+              className={`px-3 py-1 rounded-md ${page === totalPages
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-white text-[#621df6] border border-gray-300 hover:bg-gray-50"
+                }`}
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>

@@ -1,63 +1,63 @@
 import React, { useState, useEffect } from "react";
-import StudentsForm from './StudentsForm'; // Import the popup form
+import StudentsForm from './StudentsForm';
 import axios from "axios";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  Box,
-  CircularProgress,
-  IconButton,
-  Tooltip,
-  Chip,
-  Grid,
-  useTheme as useMuiTheme,
-  useMediaQuery
-} from '@mui/material';
-import {
-  Visibility as VisibilityIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Add as AddIcon
-} from '@mui/icons-material';
-import {
-  bluePurple,
-  SectionTitle,
-  StyledButton,
-  CardContainer,
-  ContentCard,
-  PageContainer
-} from './AdminSharedStyles';
+
+// Simple icon components since we don't have Heroicons
+const PlusIcon = () => <span className="inline-block w-5 h-5 text-center font-bold">+</span>;
+const EyeIcon = () => <span className="inline-block w-5 h-5 text-center">👁️</span>;
+const PencilIcon = () => <span className="inline-block w-5 h-5 text-center">✏️</span>;
+const TrashIcon = () => <span className="inline-block w-5 h-5 text-center">🗑️</span>;
+const SearchIcon = () => <span className="inline-block w-5 h-5 text-center">🔍</span>;
 
 const Student = () => {
   const [students, setStudents] = useState([]);
-  const [openIndex, setOpenIndex] = useState(null); // Track which dropdown is open
-  const [isPopupOpen, setIsPopupOpen] = useState(false); // Track popup visibility
-  const [currentStudent, setCurrentStudent] = useState(null); // Track current student data for editing
+  const [filteredStudents, setFilteredStudents] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [openIndex, setOpenIndex] = useState(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isViewPopupOpen, setIsViewPopupOpen] = useState(false);
+  const [currentStudent, setCurrentStudent] = useState(null);
+  const [viewStudent, setViewStudent] = useState(null);
   const [loading, setLoading] = useState(true);
-  const muiTheme = useMuiTheme();
-  const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'));
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState(null);
 
   const toggleDropdown = (index) => {
     if (openIndex === index) {
-      setOpenIndex(null); // Close it if already open
+      setOpenIndex(null);
     } else {
-      setOpenIndex(index); // Open the selected dropdown
+      setOpenIndex(index);
     }
   };
 
   const openPopup = (index) => {
-    setCurrentStudent({ ...students[index], index }); // Include index in student data
+    setCurrentStudent({ ...filteredStudents[index], index });
     setIsPopupOpen(true);
   };
 
   const closePopup = () => {
     setCurrentStudent(null);
     setIsPopupOpen(false);
+  };
+
+  const openViewPopup = (index) => {
+    setViewStudent(filteredStudents[index]);
+    setIsViewPopupOpen(true);
+  };
+
+  const closeViewPopup = () => {
+    setViewStudent(null);
+    setIsViewPopupOpen(false);
+  };
+
+  const openDeleteConfirm = (index) => {
+    setStudentToDelete({ ...filteredStudents[index], index });
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const closeDeleteConfirm = () => {
+    setStudentToDelete(null);
+    setIsDeleteConfirmOpen(false);
   };
 
   const handleChange = (e) => {
@@ -69,9 +69,56 @@ const Student = () => {
     e.preventDefault();
     const updatedStudents = [...students];
     updatedStudents[currentStudent.index] = { ...currentStudent };
-    delete updatedStudents[currentStudent.index].index; // Remove index from student data
+    delete updatedStudents[currentStudent.index].index;
     setStudents(updatedStudents);
     closePopup();
+  };
+
+  const handleDelete = async () => {
+    try {
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+      if (!token) {
+        console.error("No token found.");
+        return;
+      }
+
+      // If connected to real backend:
+      // await axios.delete(`http://localhost:9999/api/private/student/delete/${studentToDelete.id}`, {
+      //   headers: {
+      //     Authorization: `Bearer ${token}`,
+      //     "Content-Type": "application/json"
+      //   },
+      //   withCredentials: true
+      // });
+
+      // For now, just remove from local state
+      const updatedStudents = [...students];
+      const studentIndex = students.findIndex(s => s.enrollmentId === studentToDelete.enrollmentId);
+      updatedStudents.splice(studentIndex, 1);
+      setStudents(updatedStudents);
+      filterStudents(updatedStudents, searchTerm);
+      closeDeleteConfirm();
+    } catch (error) {
+      console.error("Error deleting student:", error);
+    }
+  };
+
+  const handleSearch = (e) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+    filterStudents(students, term);
+  };
+
+  const filterStudents = (studentList, term) => {
+    if (!term) {
+      setFilteredStudents(studentList);
+      return;
+    }
+
+    const filtered = studentList.filter(student =>
+      student.firstName.toLowerCase().includes(term.toLowerCase())
+    );
+    setFilteredStudents(filtered);
   };
 
   const fetchStudentData = async () => {
@@ -95,7 +142,16 @@ const Student = () => {
         }
       );
 
-      setStudents(response.data.data);
+      // Check if response data has a data property, otherwise use the response data directly
+      let studentData = [];
+      if (response.data && response.data.data) {
+        studentData = response.data.data;
+      } else {
+        studentData = response.data || [];
+      }
+
+      setStudents(studentData);
+      setFilteredStudents(studentData);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching students:", error);
@@ -103,258 +159,262 @@ const Student = () => {
     }
   };
 
-  // fetch data when component mounts
   useEffect(() => {
     fetchStudentData();
   }, []);
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="80vh">
-        <CircularProgress sx={{ color: bluePurple.main }} />
-      </Box>
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+      </div>
     );
   }
 
   return (
-    <PageContainer>
+    <div className="container mx-auto px-4 py-4">
       {/* Page Title and Add Button */}
-      <Box mb={3} display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap">
-        <SectionTitle variant={isMobile ? "h5" : "h4"}>
+      <div className="flex justify-between items-center mb-6 flex-wrap">
+        <h1 className="text-2xl md:text-3xl font-bold text-indigo-800 border-l-4 border-indigo-600 pl-3">
           Students
-        </SectionTitle>
-        <StyledButton
-          variant="contained"
-          startIcon={<AddIcon />}
+        </h1>
+        <button
           onClick={() => {
-            setCurrentStudent(null); // Reset student data for new entry
+            setCurrentStudent(null);
             setIsPopupOpen(true);
           }}
-          sx={{ mt: isMobile ? 1 : 0 }}
+          className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md"
         >
-          Add Student
-        </StyledButton>
-      </Box>
+          <PlusIcon />
+          <span>Add Student</span>
+        </button>
+      </div>
+
+      {/* Search Bar */}
+      <div className="mb-6">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+            <SearchIcon />
+          </div>
+          <input
+            type="text"
+            placeholder="Search by first name..."
+            value={searchTerm}
+            onChange={handleSearch}
+            className="pl-10 pr-4 py-2 w-full lg:w-1/3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+        <div className="mt-2 text-sm text-gray-600">
+          {filteredStudents.length} {filteredStudents.length === 1 ? 'student' : 'students'} found
+        </div>
+      </div>
 
       {/* Main content */}
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <CardContainer>
-            <ContentCard sx={{ p: { xs: 1, sm: 2 } }}>
-              <TableContainer
-                sx={{
-                  overflow: 'auto',
-                  maxHeight: 'calc(100vh - 180px)',
-                  '&::-webkit-scrollbar': {
-                    width: '8px',
-                    height: '8px',
-                  },
-                  '&::-webkit-scrollbar-thumb': {
-                    backgroundColor: 'rgba(106, 90, 205, 0.3)',
-                    borderRadius: '4px',
-                    '&:hover': {
-                      backgroundColor: 'rgba(106, 90, 205, 0.5)',
-                    }
-                  },
-                  '&::-webkit-scrollbar-track': {
-                    backgroundColor: 'rgba(0,0,0,0.05)',
-                    borderRadius: '4px',
-                  },
-                }}
-              >
-                <Table stickyHeader aria-label="students table">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{
-                        fontWeight: 'bold',
-                        background: bluePurple.gradient,
-                        color: 'white',
-                        whiteSpace: 'nowrap'
-                      }}>Enrollment ID</TableCell>
-                      <TableCell sx={{
-                        fontWeight: 'bold',
-                        background: bluePurple.gradient,
-                        color: 'white',
-                        whiteSpace: 'nowrap'
-                      }}>Surname</TableCell>
-                      <TableCell sx={{
-                        fontWeight: 'bold',
-                        background: bluePurple.gradient,
-                        color: 'white',
-                        whiteSpace: 'nowrap'
-                      }}>Firstname</TableCell>
-                      <TableCell sx={{
-                        fontWeight: 'bold',
-                        background: bluePurple.gradient,
-                        color: 'white',
-                        whiteSpace: 'nowrap'
-                      }}>Middlename</TableCell>
-                      <TableCell sx={{
-                        fontWeight: 'bold',
-                        background: bluePurple.gradient,
-                        color: 'white',
-                        whiteSpace: 'nowrap'
-                      }}>Mobile</TableCell>
-                      <TableCell sx={{
-                        fontWeight: 'bold',
-                        background: bluePurple.gradient,
-                        color: 'white',
-                        whiteSpace: 'nowrap'
-                      }}>Email</TableCell>
-                      <TableCell sx={{
-                        fontWeight: 'bold',
-                        background: bluePurple.gradient,
-                        color: 'white',
-                        whiteSpace: 'nowrap'
-                      }}>Gender</TableCell>
-                      <TableCell sx={{
-                        fontWeight: 'bold',
-                        background: bluePurple.gradient,
-                        color: 'white',
-                        whiteSpace: 'nowrap'
-                      }}>DOB</TableCell>
-                      <TableCell sx={{
-                        fontWeight: 'bold',
-                        background: bluePurple.gradient,
-                        color: 'white',
-                        whiteSpace: 'nowrap'
-                      }}>Program</TableCell>
-                      <TableCell sx={{
-                        fontWeight: 'bold',
-                        background: bluePurple.gradient,
-                        color: 'white',
-                        whiteSpace: 'nowrap'
-                      }}>Degree</TableCell>
-                      <TableCell sx={{
-                        fontWeight: 'bold',
-                        background: bluePurple.gradient,
-                        color: 'white',
-                        whiteSpace: 'nowrap'
-                      }}>Degree Name</TableCell>
-                      <TableCell sx={{
-                        fontWeight: 'bold',
-                        background: bluePurple.gradient,
-                        color: 'white',
-                        whiteSpace: 'nowrap'
-                      }}>Current Sem</TableCell>
-                      <TableCell sx={{
-                        fontWeight: 'bold',
-                        background: bluePurple.gradient,
-                        color: 'white',
-                        whiteSpace: 'nowrap'
-                      }}>Current Year</TableCell>
-                      <TableCell sx={{
-                        fontWeight: 'bold',
-                        background: bluePurple.gradient,
-                        color: 'white',
-                        textAlign: 'center',
-                        whiteSpace: 'nowrap'
-                      }}>Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {students && students.length > 0 ? (
-                      students.map((student, index) => (
-                        <TableRow
-                          key={index}
-                          sx={{
-                            '&:nth-of-type(odd)': { bgcolor: bluePurple.lighter },
-                            '&:hover': { bgcolor: 'rgba(106, 90, 205, 0.08)' },
-                          }}
-                        >
-                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.enrollmentId}</TableCell>
-                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.surName}</TableCell>
-                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.firstName}</TableCell>
-                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.middleName}</TableCell>
-                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.mobileNo}</TableCell>
-                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.email}</TableCell>
-                          <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                            <Chip
-                              label={student.gender}
-                              size="small"
-                              sx={{
-                                color: student.gender === 'Male' ? bluePurple.dark : '#d32f2f',
-                                borderColor: student.gender === 'Male' ? bluePurple.main : '#f44336',
-                                backgroundColor: student.gender === 'Male' ? 'rgba(106, 90, 205, 0.1)' : 'rgba(244, 67, 54, 0.1)'
-                              }}
-                              variant="outlined"
-                            />
-                          </TableCell>
-                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.dateOfBirth}</TableCell>
-                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.program}</TableCell>
-                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.degree}</TableCell>
-                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.degreeName}</TableCell>
-                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.currentSem}</TableCell>
-                          <TableCell sx={{ whiteSpace: 'nowrap' }}>{student.currentYear}</TableCell>
-                          <TableCell sx={{ whiteSpace: 'nowrap', textAlign: 'center' }}>
-                            <Tooltip title="View">
-                              <IconButton
-                                size="small"
-                                sx={{
-                                  color: bluePurple.main,
-                                  '&:hover': {
-                                    backgroundColor: bluePurple.lighter,
-                                  }
-                                }}
-                              >
-                                <VisibilityIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Edit">
-                              <IconButton
-                                size="small"
-                                sx={{
-                                  color: bluePurple.dark,
-                                  '&:hover': {
-                                    backgroundColor: bluePurple.lighter,
-                                  }
-                                }}
-                                onClick={() => openPopup(index)}
-                              >
-                                <EditIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Delete">
-                              <IconButton
-                                size="small"
-                                sx={{
-                                  color: '#d32f2f',
-                                  '&:hover': {
-                                    backgroundColor: 'rgba(244, 67, 54, 0.08)',
-                                  }
-                                }}
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={14} sx={{ textAlign: 'center', py: 3 }}>
-                          <Typography color="text.secondary">No students found.</Typography>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </ContentCard>
-          </CardContainer>
-        </Grid>
-      </Grid>
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <div className="inline-block min-w-full align-middle">
+            <div className="overflow-auto max-h-[calc(100vh-250px)]">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gradient-to-r from-indigo-600 to-purple-600">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider whitespace-nowrap">
+                      Enrollment ID
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider whitespace-nowrap">
+                      Name
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider whitespace-nowrap">
+                      Email
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider whitespace-nowrap">
+                      Program
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider whitespace-nowrap">
+                      Current Sem
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider whitespace-nowrap">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredStudents && filteredStudents.length > 0 ? (
+                    filteredStudents.map((student, index) => (
+                      <tr
+                        key={index}
+                        className={`${index % 2 === 0 ? 'bg-white' : 'bg-indigo-50'} hover:bg-indigo-100 transition-colors duration-150`}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{student.enrollmentId}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {student.firstName} {student.middleName} {student.surName}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{student.email}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{student.program}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{student.currentSem}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                          <div className="flex justify-center space-x-2">
+                            <button
+                              className="p-1 rounded-full text-indigo-600 hover:bg-indigo-100"
+                              title="View"
+                              onClick={() => openViewPopup(index)}
+                            >
+                              <EyeIcon />
+                            </button>
+                            <button
+                              className="p-1 rounded-full text-indigo-800 hover:bg-indigo-100"
+                              title="Edit"
+                              onClick={() => openPopup(index)}
+                            >
+                              <PencilIcon />
+                            </button>
+                            <button
+                              className="p-1 rounded-full text-red-600 hover:bg-red-100"
+                              title="Delete"
+                              onClick={() => openDeleteConfirm(index)}
+                            >
+                              <TrashIcon />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-10 text-center text-gray-500">
+                        {searchTerm ? 'No students match your search.' : 'No students found.'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      {/* Edit Student Popup */}
       {isPopupOpen && (
         <StudentsForm
           studentData={currentStudent}
+          onClose={closePopup}
           onChange={handleChange}
           onSubmit={handleSubmit}
-          onClose={closePopup}
-          themeColor={bluePurple}
         />
       )}
-    </PageContainer>
+
+      {/* View Student Popup */}
+      {isViewPopupOpen && viewStudent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-indigo-800">
+                Student Details
+              </h2>
+              <button
+                onClick={closeViewPopup}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-500">Enrollment ID</p>
+                    <p className="font-medium text-indigo-800">{viewStudent.enrollmentId}</p>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-500">Full Name</p>
+                    <p className="font-medium text-indigo-800">{viewStudent.firstName} {viewStudent.middleName} {viewStudent.surName}</p>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-500">Gender</p>
+                    <p className="font-medium text-indigo-800">{viewStudent.gender}</p>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-500">Date of Birth</p>
+                    <p className="font-medium text-indigo-800">{viewStudent.dateOfBirth}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-500">Email</p>
+                    <p className="font-medium text-indigo-800">{viewStudent.email}</p>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-500">Mobile</p>
+                    <p className="font-medium text-indigo-800">{viewStudent.mobileNo}</p>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-500">Program & Degree</p>
+                    <p className="font-medium text-indigo-800">{viewStudent.program} - {viewStudent.degreeName} ({viewStudent.degree})</p>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-500">Current Semester & Year</p>
+                    <p className="font-medium text-indigo-800">Semester {viewStudent.currentSem}, Year {viewStudent.currentYear}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-gray-200 flex justify-end">
+                <button
+                  onClick={closeViewPopup}
+                  className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Popup */}
+      {isDeleteConfirmOpen && studentToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-red-600">
+                Confirm Delete
+              </h2>
+            </div>
+
+            <div className="p-6">
+              <p className="text-gray-700 mb-4">
+                Are you sure you want to delete student <span className="font-semibold">{studentToDelete.firstName} {studentToDelete.surName}</span> with enrollment ID <span className="font-semibold">{studentToDelete.enrollmentId}</span>?
+              </p>
+              <p className="text-gray-700 mb-4 text-sm">
+                This action cannot be undone.
+              </p>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  onClick={closeDeleteConfirm}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
