@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import useTheme from '../../context/NewContext';
 
 // Simple icon components
 const SearchIcon = () => (
@@ -27,7 +26,6 @@ const DeleteIcon = () => (
 );
 
 function Circulation() {
-  const { isOpenForSideBar } = useTheme();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({

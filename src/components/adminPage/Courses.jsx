@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import useTheme from '../../context/NewContext';
 
 // Sample icons as SVGs
 const SearchIcon = () => (
@@ -27,7 +26,6 @@ const DeleteIcon = () => (
 );
 
 function Courses() {
-  const { isOpenForSideBar } = useTheme();
   const [filters, setFilters] = useState({
     course: 'All Courses',
     year: 'All Years',
@@ -216,10 +214,10 @@ function Courses() {
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{student.year}</td>
                     <td className="px-4 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${student.status === 'Active'
-                          ? 'bg-green-100 text-green-800'
-                          : student.status === 'Inactive'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-yellow-100 text-yellow-800'
+                        ? 'bg-green-100 text-green-800'
+                        : student.status === 'Inactive'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-yellow-100 text-yellow-800'
                         }`}>
                         {student.status}
                       </span>
@@ -259,8 +257,8 @@ function Courses() {
                   key={pageNum}
                   onClick={() => handlePageChange(pageNum)}
                   className={`px-3 py-1 border rounded-md ${pageNum === page
-                      ? 'bg-indigo-600 text-white border-indigo-600'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    ? 'bg-indigo-600 text-white border-indigo-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                     }`}
                 >
                   {pageNum}

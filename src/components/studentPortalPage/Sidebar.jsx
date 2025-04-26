@@ -87,10 +87,19 @@ const Sidebar = () => {
             <div className={`${isOpenForSideBar ? 'w-64' : 'w-20'} bg-[#4500e2] text-white transition-all duration-300 ease-in-out transform fixed flex flex-col justify-between top-0 left-0 h-full`}>
                 {/* Navigation Links */}
                 <div className="space-y-4">
-                    <div className="p-4 border-b">
-                        <Link to='/studentportal' className="text-2xl font-bold">
-                            Student Portal
-                        </Link>
+                    <div className="pt-2 text-center">
+                        <div className="flex justify-center mb-3">
+                            <img
+                                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnk_mHU60ab1ecR7UEdEBTMOebiqbSDtXJtQ&s"
+                                alt="University Logo"
+                                className="h-16 rounded bg-white p-1 shadow-md"
+                            />
+                        </div>
+                        <div className="p-4 border-b border-indigo-300">
+                            <Link to='/studentportal' className="text-2xl font-bold">
+                                Student Portal
+                            </Link>
+                        </div>
                     </div>
                     {navLinks.map(({ to, name, icon }) => (
                         <div key={to} className="flex items-center">

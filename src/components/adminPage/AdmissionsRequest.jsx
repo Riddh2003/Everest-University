@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import useTheme from "../../context/NewContext";
 import { useNavigate } from "react-router-dom";
 import { Flip, toast, ToastContainer } from "react-toastify";
 import axios from "axios";
@@ -10,7 +9,6 @@ const AdmissionsRequest = () => {
   const [admissionRequests, setAdmissionRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
-  const { isOpenForSideBar } = useTheme();
   const navigate = useNavigate();
 
   // Fetch admission requests from backend
@@ -89,7 +87,7 @@ const AdmissionsRequest = () => {
       <ToastContainer position="top-center" autoClose={3000} transition={Flip} />
 
       <div className="min-h-screen px-4 py-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="">
           <h1 className="text-2xl md:text-3xl font-bold text-indigo-700 text-center mb-8">
             Admission Requests
           </h1>

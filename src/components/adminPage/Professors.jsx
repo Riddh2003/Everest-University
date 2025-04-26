@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useTheme from '../../context/NewContext';
 import ProfessorsForm from './ProfessorsForm';
 import axios from 'axios';
 import 'react-toastify/dist/ReactToastify.css';
 import { toast } from 'react-toastify';
 
 function Professors() {
-  const { isOpenForSideBar } = useTheme();
   const navigate = useNavigate();
   const [professors, setProfessors] = useState([]);
   const [loading, setLoading] = useState(true);
