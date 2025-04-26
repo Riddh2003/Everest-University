@@ -10,7 +10,8 @@ import {
     Box,
     Tooltip,
     useMediaQuery,
-    Typography
+    Typography,
+    IconButton
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import PersonIcon from '@mui/icons-material/Person';
@@ -18,14 +19,16 @@ import PeopleIcon from '@mui/icons-material/People';
 import BookIcon from '@mui/icons-material/Book';
 import WorkIcon from '@mui/icons-material/Work';
 import SchoolIcon from '@mui/icons-material/School';
+import MenuIcon from '@mui/icons-material/Menu';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 
 // Define blue-purple theme colors
 const bluePurple = {
-    main: '#6a5acd', // SlateBlue (blue-purple)
-    dark: '#483d8b', // DarkSlateBlue (darker blue-purple)
-    light: '#8a7cdf', // Lighter blue-purple
+    main: '#4500e2', // New primary blue color
+    dark: '#3700b3', // Darker version
+    light: '#6e29ff', // Lighter version
     lighter: '#e8e6ff', // Very light blue-purple
-    gradient: 'linear-gradient(135deg, #5e60ce 0%, #7b68ee 100%)', // Gradient from blue to purple
+    gradient: 'linear-gradient(135deg, #4500e2 0%, #6e29ff 100%)', // Gradient using the new color
 };
 
 // Custom styled component for the drawer
@@ -71,7 +74,7 @@ const NavItem = styled(ListItem)(({ theme, active }) => ({
     padding: theme.spacing(0, 2.5),
     borderRadius: '12px',
     marginBottom: theme.spacing(0.7),
-    backgroundColor: active ? 'rgba(255,255,255,0.2)' : 'transparent',
+    backgroundColor: active === "true" ? 'rgba(255,255,255,0.2)' : 'transparent',
     '&:hover': {
         backgroundColor: 'rgba(255,255,255,0.1)',
     },
@@ -89,7 +92,7 @@ function AdminSideBar() {
         } else {
             setIsOpenForSideBar(true);
         }
-    }, [isMobile, location.pathname, setIsOpenForSideBar]);
+    }, [isMobile, setIsOpenForSideBar]);
 
     // Array of navigation links with Material UI icons
     const navLinks = [
@@ -126,58 +129,130 @@ function AdminSideBar() {
     ];
 
     return (
-        <StyledDrawer
-            variant={isMobile ? "temporary" : "permanent"}
-            open={isOpenForSideBar}
-            onClose={() => setIsOpenForSideBar(false)}
-        >
-            <AppTitle>
-                {isOpenForSideBar ? (
-                    <Typography variant="h6" fontWeight="bold" sx={{ letterSpacing: '0.5px' }}>
-                        Smart Campus
-                    </Typography>
-                ) : (
-                    <SchoolIcon sx={{ fontSize: 30 }} />
-                )}
-            </AppTitle>
+        <>
+            {/* Mobile Toggle Button */}
+            {isMobile && (
+                <IconButton
+                    color="primary"
+                    aria-label="toggle sidebar"
+                    onClick={() => setIsOpenForSideBar(!isOpenForSideBar)}
+                    sx={{
+                        position: 'fixed',
+                        left: isOpenForSideBar ? 240 : 16,
+                        top: 16,
+                        zIndex: 1300,
+                        bgcolor: '#5e19f3',
+                        color: 'white',
+                        '&:hover': {
+                            bgcolor: '#4500e2',
+                        },
+                        transition: 'left 0.3s ease',
+                        boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                    }}
+                >
+                    {isOpenForSideBar ? <ChevronLeftIcon /> : <MenuIcon />}
+                </IconButton>
+            )}
 
-            <List sx={{ p: 1.5 }}>
-                {navLinks.map(({ to, name, icon }) => (
-                    <NavItem
-                        button
-                        key={to}
-                        component={Link}
-                        to={to}
-                        active={location.pathname === to ? 1 : 0}
-                    >
-                        <Tooltip title={isOpenForSideBar ? "" : name} placement="right">
-                            <ListItemIcon
-                                sx={{
-                                    minWidth: 0,
-                                    mr: isOpenForSideBar ? 3 : 'auto',
-                                    justifyContent: 'center',
-                                    color: 'inherit'
-                                }}
-                            >
-                                {icon}
-                            </ListItemIcon>
-                        </Tooltip>
-                        {isOpenForSideBar && (
-                            <ListItemText
-                                primary={name}
-                                primaryTypographyProps={{
-                                    fontWeight: location.pathname === to ? 'bold' : 'normal',
-                                }}
-                                sx={{
-                                    opacity: isOpenForSideBar ? 1 : 0,
-                                    transition: 'opacity 0.3s'
-                                }}
-                            />
-                        )}
-                    </NavItem>
-                ))}
-            </List>
-        </StyledDrawer>
+            <StyledDrawer
+                variant={isMobile ? "temporary" : "permanent"}
+                open={isOpenForSideBar}
+                onClose={() => setIsOpenForSideBar(false)}
+            >
+                <AppTitle>
+                    {isOpenForSideBar ? (
+                        <Typography variant="h6" fontWeight="bold" sx={{ letterSpacing: '0.5px' }}>
+                            Everest University
+                        </Typography>
+                    ) : (
+                        <SchoolIcon sx={{ fontSize: 30 }} />
+                    )}
+                </AppTitle>
+
+                {/* Sidebar toggle button for non-mobile */}
+                {!isMobile && (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                        <IconButton
+                            onClick={() => setIsOpenForSideBar(!isOpenForSideBar)}
+                            sx={{
+                                color: 'white',
+                                bgcolor: 'rgba(255,255,255,0.1)',
+                                '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' }
+                            }}
+                        >
+                            {isOpenForSideBar ? <ChevronLeftIcon /> : <MenuIcon />}
+                        </IconButton>
+                    </Box>
+                )}
+
+                <List sx={{ p: 1.5 }}>
+                    {navLinks.map(({ to, name, icon }) => (
+                        <NavItem
+                            component={Link}
+                            key={to}
+                            to={to}
+                            active={location.pathname === to ? "true" : "false"}
+                        >
+                            <Tooltip title={isOpenForSideBar ? "" : name} placement="right">
+                                <ListItemIcon
+                                    sx={{
+                                        minWidth: 0,
+                                        mr: isOpenForSideBar ? 3 : 'auto',
+                                        justifyContent: 'center',
+                                        color: 'inherit'
+                                    }}
+                                >
+                                    {icon}
+                                </ListItemIcon>
+                            </Tooltip>
+                            {isOpenForSideBar && (
+                                <ListItemText
+                                    primary={name}
+                                    primaryTypographyProps={{
+                                        fontWeight: location.pathname === to ? 'bold' : 'normal',
+                                    }}
+                                    sx={{
+                                        opacity: isOpenForSideBar ? 1 : 0,
+                                        transition: 'opacity 0.3s'
+                                    }}
+                                />
+                            )}
+                        </NavItem>
+                    ))}
+                </List>
+
+                {/* Admin Profile Section */}
+                <Box
+                    sx={{
+                        mt: 'auto',
+                        p: 2,
+                        borderTop: '1px solid rgba(255,255,255,0.15)',
+                        display: 'flex',
+                        alignItems: 'center'
+                    }}
+                >
+                    <Box
+                        component="img"
+                        src="https://avatar.iran.liara.run/public"
+                        alt="Admin"
+                        sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: '50%',
+                            border: '2px solid white',
+                            backgroundColor: 'white',
+                            mr: 2
+                        }}
+                    />
+                    {isOpenForSideBar && (
+                        <Box>
+                            <Typography variant="body2" fontWeight="bold">Admin Name</Typography>
+                            <Typography variant="caption">admin@smartcampus.edu</Typography>
+                        </Box>
+                    )}
+                </Box>
+            </StyledDrawer>
+        </>
     );
 }
 

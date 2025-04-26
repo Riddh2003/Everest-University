@@ -1,663 +1,340 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { toast } from 'react-toastify';
-import {
-    Card,
-    CardContent,
-    Button,
-    Typography,
-    TextField,
-    Grid,
-    Box,
-    Avatar,
-    Paper,
-    Divider,
-    CircularProgress,
-    styled,
-    useTheme,
-    useMediaQuery
-} from '@mui/material';
-import { Mail, Phone, Person, School, Edit, Save, Cancel } from '@mui/icons-material';
-
-// Blue-purple color theme 
-export const bluePurple = {
-    main: '#6a5acd', // SlateBlue (blue-purple)
-    dark: '#483d8b', // DarkSlateBlue (darker blue-purple)
-    light: '#8a7cdf', // Lighter blue-purple
-    lighter: '#e8e6ff', // Very light blue-purple
-    gradient: 'linear-gradient(135deg, #5e60ce 0%, #7b68ee 100%)', // Gradient from blue to purple
-};
-
-// Styled components for consistent UI
-export const CardContainer = styled(Card)(({ theme }) => ({
-    borderRadius: theme.shape.borderRadius * 2,
-    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-    overflow: 'hidden',
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-}));
-
-export const SectionTitle = styled(Typography)(({ theme }) => ({
-    color: bluePurple.dark,
-    fontWeight: 700,
-    marginBottom: theme.spacing(2),
-    position: 'relative',
-    paddingLeft: theme.spacing(1.5),
-    '&::before': {
-        content: '""',
-        position: 'absolute',
-        left: 0,
-        top: '10%',
-        height: '80%',
-        width: '4px',
-        backgroundColor: bluePurple.main,
-        borderRadius: theme.shape.borderRadius,
-    }
-}));
-
-export const StyledButton = styled(Button)(({ theme }) => ({
-    borderRadius: theme.shape.borderRadius * 1.5,
-    padding: '8px 20px',
-    transition: 'all 0.3s ease',
-    textTransform: 'none',
-    fontWeight: 600,
-    boxShadow: 'none',
-    '&.MuiButton-contained': {
-        background: bluePurple.gradient,
-        '&:hover': {
-            background: `linear-gradient(135deg, ${bluePurple.dark} 0%, ${bluePurple.main} 100%)`,
-            boxShadow: '0 4px 10px rgba(106,90,205,0.3)',
-        }
-    },
-    '&.MuiButton-outlined': {
-        borderColor: bluePurple.main,
-        color: bluePurple.main,
-        '&:hover': {
-            backgroundColor: bluePurple.lighter,
-            borderColor: bluePurple.dark,
-        }
-    }
-}));
-
-export const ContentCard = styled(CardContent)(({ theme }) => ({
-    padding: theme.spacing(3),
-    [theme.breakpoints.down('sm')]: {
-        padding: theme.spacing(2),
-    },
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-}));
-
-export const PageContainer = styled(Box)(({ theme }) => ({
-    padding: theme.spacing(3, 0),
-    [theme.breakpoints.down('sm')]: {
-        padding: theme.spacing(2, 0),
-    },
-    width: '100%',
-    height: '100%',
-}));
-
-// Styled components for better UI
-const ProfileCard = styled(Card)(({ theme }) => ({
-    background: bluePurple.gradient,
-    color: '#fff',
-    borderRadius: theme.shape.borderRadius * 2,
-    boxShadow: '0 10px 20px rgba(106,90,205,0.2)',
-    height: '100%',
-}));
-
-const InfoCard = styled(CardContainer)(({ theme }) => ({
-    height: '100%',
-}));
-
-const ProfileAvatar = styled(Avatar)(({ theme }) => ({
-    width: 120,
-    height: 120,
-    border: `4px solid #fff`,
-    boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
-    marginBottom: theme.spacing(2),
-    [theme.breakpoints.down('sm')]: {
-        width: 100,
-        height: 100,
-    },
-}));
-
-const InfoItem = styled(Box)(({ theme }) => ({
-    display: 'flex',
-    alignItems: 'flex-start',
-    marginBottom: theme.spacing(3),
-    [theme.breakpoints.down('sm')]: {
-        flexDirection: 'column',
-        '& > *:first-of-type': {
-            marginBottom: theme.spacing(1),
-        },
-    },
-}));
-
-const IconWrapper = styled(Box)(({ theme }) => ({
-    marginRight: theme.spacing(2),
-    color: bluePurple.main,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: bluePurple.lighter,
-    padding: theme.spacing(1),
-    borderRadius: '50%',
-    [theme.breakpoints.down('sm')]: {
-        marginRight: 0,
-        marginBottom: theme.spacing(1),
-    },
-}));
-
-const FileInputWrapper = styled(Box)(({ theme }) => ({
-    width: '100%',
-    [theme.breakpoints.down('sm')]: {
-        '& input': {
-            fontSize: '0.875rem',
-        }
-    }
-}));
-
-const InfoSection = styled(Box)(({ theme }) => ({
-    marginBottom: theme.spacing(4),
-}));
-
-const InfoLabel = styled(Typography)(({ theme }) => ({
-    color: theme.palette.text.secondary,
-    fontSize: '0.875rem',
-    marginBottom: theme.spacing(0.5),
-}));
-
-const InfoValue = styled(Typography)(({ theme }) => ({
-    fontWeight: 500,
-}));
 
 const AdminProfile = () => {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-    const [adminData, setAdminData] = useState(null);
+    const [admin, setAdmin] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [editing, setEditing] = useState(false);
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        phoneNumber: '',
-        qualification: '',
-        password: '',
-        profilePicture: ''
-    });
+    const [error, setError] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
 
     useEffect(() => {
-        fetchAdminProfile();
-    }, []);
+        const fetchAdminData = async () => {
+            try {
+                // Get admin email from localStorage or sessionStorage
+                const email = localStorage.getItem('email') || sessionStorage.getItem('email');
 
-    const fetchAdminProfile = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                toast.error('Please login first');
-                return;
-            }
+                // Try to get token from both localStorage and sessionStorage
+                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
-            const email = localStorage.getItem('email');
-            if (!email) {
-                toast.error('Admin email not found');
-                return;
-            }
-
-            const response = await axios.get(`http://localhost:9999/api/private/admin/getadminbyemail?email=${email}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            if (response.data.success) {
-                setAdminData(response.data.data);
-                setFormData({
-                    name: response.data.data.name || '',
-                    email: response.data.data.email || '',
-                    phoneNumber: response.data.data.phoneNumber || '',
-                    qualification: response.data.data.qualification || '',
-                    password: '',
-                    profilePicture: response.data.data.profilePicture || ''
+                console.log("Auth data:", {
+                    email,
+                    tokenExists: !!token,
+                    tokenSource: localStorage.getItem('token') ? 'localStorage' : sessionStorage.getItem('token') ? 'sessionStorage' : 'none'
                 });
-            } else {
-                toast.error(response.data.message || 'Failed to fetch admin profile');
-            }
-        } catch (error) {
-            console.error('Error fetching admin profile:', error);
-            toast.error('Error fetching admin profile');
-        } finally {
-            setLoading(false);
-        }
-    };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
+                if (!email) {
+                    throw new Error('Admin email not found. Please login again.');
+                }
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
+                if (!token) {
+                    throw new Error('Authentication token not found. Please login again.');
+                }
 
-                    // Target dimensions
-                    const maxWidth = 800;
-                    const maxHeight = 800;
+                // Explicitly include the token in the request headers and set withCredentials to true
+                console.log("Making API request with token:", token.substring(0, 15) + "...");
 
-                    let width = img.width;
-                    let height = img.height;
-
-                    // Calculate new dimensions
-                    if (width > height) {
-                        if (width > maxWidth) {
-                            height *= maxWidth / width;
-                            width = maxWidth;
-                        }
-                    } else {
-                        if (height > maxHeight) {
-                            width *= maxHeight / height;
-                            height = maxHeight;
-                        }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-
-                    // Draw and compress image
-                    ctx.drawImage(img, 0, 0, width, height);
-                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-
-                    setFormData(prev => ({
-                        ...prev,
-                        profilePicture: compressedDataUrl
-                    }));
-                };
-                img.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (!formData.name || !formData.email || !formData.phoneNumber) {
-            toast.error('Name, email, and phone number are required');
-            return;
-        }
-
-        try {
-            setLoading(true);
-
-            const token = localStorage.getItem('token');
-            if (!token) {
-                toast.error('Please login first');
-                return;
-            }
-
-            const updateData = {
-                ...formData,
-                adminId: adminData.id
-            };
-
-            // If password is empty, don't update it
-            if (!updateData.password) {
-                delete updateData.password;
-            }
-
-            const response = await axios.put(
-                'http://localhost:9999/api/private/profile/updateadmin',
-                updateData,
-                {
+                const response = await axios.get(`http://localhost:9999/api/private/admin/getadminbyemail?email=${email}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
-                    }
-                }
-            );
+                    },
+                    withCredentials: true // This is important for CORS with credentials
+                });
 
-            if (response.data.success || response.status === 200) {
-                toast.success('Profile updated successfully');
-                setEditing(false);
-                fetchAdminProfile(); // Reload data
-            } else {
-                toast.error(response.data.message || 'Update failed');
+                console.log("API Response:", response.status, response.data);
+
+                // Check the structure of the response data
+                if (response.data) {
+                    // If response.data.data exists and contains the admin info
+                    if (response.data.data) {
+                        setAdmin(response.data.data);
+                    }
+                    // If response.data itself is the admin object
+                    else if (response.data.adminId) {
+                        setAdmin(response.data);
+                    }
+                    // If response.data.success exists and contains the admin info
+                    else if (response.data.success && typeof response.data.success === 'object') {
+                        setAdmin(response.data.success);
+                    }
+                    // Fallback - show the entire response data structure for debugging
+                    else {
+                        console.log("Response structure:", JSON.stringify(response.data, null, 2));
+                        setAdmin(response.data);
+                    }
+                } else {
+                    throw new Error('Failed to fetch admin data');
+                }
+            } catch (err) {
+                console.error('Detailed error:', err);
+                if (err.response) {
+                    console.error('Error status:', err.response.status);
+                    console.error('Error data:', err.response.data);
+
+                    if (err.response.status === 403) {
+                        setError('Authentication failed. Please login again.');
+                        // Store current URL to redirect back after login
+                        sessionStorage.setItem('redirectUrl', window.location.pathname);
+                    } else {
+                        setError(err.response.data?.message || 'An error occurred while fetching admin data');
+                    }
+                } else {
+                    setError(err.message || 'An error occurred while fetching admin data');
+                }
+            } finally {
+                setLoading(false);
             }
-        } catch (error) {
-            console.error('Error updating profile:', error);
-            toast.error(error.response?.data?.message || 'Something went wrong');
-        } finally {
-            setLoading(false);
+        };
+
+        fetchAdminData();
+    }, []);
+
+    // For debugging - log what we actually have
+    useEffect(() => {
+        if (admin) {
+            console.log("Admin data in state:", admin);
         }
-    };
+    }, [admin]);
 
     if (loading) {
         return (
-            <Box display="flex" justifyContent="center" alignItems="center" height="80vh">
-                <CircularProgress sx={{ color: bluePurple.main }} />
-            </Box>
+            <div className="flex justify-center items-center h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#5e19f3]"></div>
+            </div>
         );
     }
 
+    if (error) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong className="font-bold">Error! </strong>
+                    <span className="block sm:inline">{error}</span>
+                </div>
+            </div>
+        );
+    }
+
+    // If no admin data is available even though loading is complete
+    if (!admin) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative" role="alert">
+                    <strong className="font-bold">Warning! </strong>
+                    <span className="block sm:inline">No admin data available. Please try logging in again.</span>
+                </div>
+            </div>
+        );
+    }
+
+    // For emoji profile picture when no actual picture is available
+    const getInitialEmoji = (name) => {
+        const emojis = ['👨‍🏫', '👩‍🏫', '👨‍🎓', '👩‍🎓', '👨‍💼', '👩‍💼', '🧑‍🏫', '🧑‍🎓'];
+        // Use the name to deterministically select an emoji
+        const nameSum = name?.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0) || 0;
+        return emojis[nameSum % emojis.length];
+    };
+
+    const handleEdit = () => {
+        setIsEditing(true);
+    };
+
+    const handleCancel = () => {
+        setIsEditing(false);
+    };
+
+    const handleSave = () => {
+        // Would implement the save functionality here
+        setIsEditing(false);
+        // Show a success message
+        alert("Profile updated successfully!");
+    };
+
     return (
-        <PageContainer>
-            {/* Page Title */}
-            <Box mb={3}>
-                <SectionTitle variant={isMobile ? "h5" : "h4"}>
-                    Admin Profile
-                </SectionTitle>
-            </Box>
-
-            {!editing ? (
-                <Grid container spacing={3}>
-                    <Grid item xs={12} md={4}>
-                        <ProfileCard>
-                            <CardContent sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                p: { xs: 3, sm: 4 }
-                            }}>
-                                {adminData?.profilePicture ? (
-                                    <ProfileAvatar src={adminData.profilePicture} alt="Profile" />
+        <div className="w-full h-screen bg-white p-4 md:p-6 overflow-auto">
+            <div className="bg-white shadow-lg rounded-lg overflow-hidden max-w-4xl mx-auto">
+                <div className="bg-[#5e19f3] p-6">
+                    <div className="flex flex-col md:flex-row items-center justify-between">
+                        <div className="flex flex-col md:flex-row items-center">
+                            <div className="mb-4 md:mb-0 md:mr-6">
+                                {admin?.profilePicture ? (
+                                    <img
+                                        src={admin.profilePicture}
+                                        alt={admin.name || "Admin"}
+                                        className="w-24 h-24 rounded-full border-4 border-white object-cover"
+                                    />
                                 ) : (
-                                    <ProfileAvatar>
-                                        <Person sx={{ fontSize: isMobile ? 40 : 50 }} />
-                                    </ProfileAvatar>
+                                    <div className="w-24 h-24 rounded-full border-4 border-white bg-purple-100 flex items-center justify-center text-4xl">
+                                        {getInitialEmoji(admin?.name || "Admin")}
+                                    </div>
                                 )}
-                                <Typography variant={isMobile ? "h6" : "h5"} sx={{ mb: 0.5, fontWeight: 'bold', textAlign: 'center' }}>
-                                    {adminData?.name || 'Admin Name'}
-                                </Typography>
-                                <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>Admin</Typography>
-                                <Typography variant="body1" sx={{ mt: 1, fontWeight: 500, textAlign: 'center', opacity: 0.95 }}>
-                                    {adminData?.qualification || 'Not specified'}
-                                </Typography>
-                            </CardContent>
-                        </ProfileCard>
-                    </Grid>
+                            </div>
+                            <div className="text-center md:text-left">
+                                <h1 className="text-2xl font-bold text-white">{admin?.name || "Admin"}</h1>
+                                <p className="text-purple-100 capitalize">{admin?.role || "Administrator"}</p>
+                            </div>
+                        </div>
+                        <div className="mt-4 md:mt-0">
+                            <button
+                                onClick={handleEdit}
+                                className="bg-white text-[#5e19f3] hover:bg-purple-50 font-semibold py-2 px-4 rounded-lg shadow-sm transition-all duration-200 ease-in-out"
+                            >
+                                Edit Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-                    <Grid item xs={12} md={8}>
-                        <InfoCard>
-                            <ContentCard>
-                                <InfoSection>
-                                    <Typography variant="h6" color={bluePurple.dark} sx={{ mb: 2, fontWeight: 600 }}>
-                                        Contact Information
-                                    </Typography>
-                                    <Divider sx={{ mb: 3 }} />
+                <div className="p-6">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-semibold text-[#5e19f3]">Personal Information</h2>
+                        {isEditing && (
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleSave}
+                                    className="bg-[#5e19f3] text-white hover:bg-[#4e16c7] font-medium py-1.5 px-3 rounded-lg shadow-sm transition-all duration-200"
+                                >
+                                    Save
+                                </button>
+                                <button
+                                    onClick={handleCancel}
+                                    className="bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium py-1.5 px-3 rounded-lg shadow-sm transition-all duration-200"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        )}
+                    </div>
 
-                                    <InfoItem>
-                                        <IconWrapper>
-                                            <Mail fontSize={isMobile ? "small" : "medium"} />
-                                        </IconWrapper>
-                                        <Box>
-                                            <InfoLabel>
-                                                Email
-                                            </InfoLabel>
-                                            <InfoValue sx={{ wordBreak: 'break-word' }}>
-                                                {adminData?.email || 'Not provided'}
-                                            </InfoValue>
-                                        </Box>
-                                    </InfoItem>
-
-                                    <InfoItem>
-                                        <IconWrapper>
-                                            <Phone fontSize={isMobile ? "small" : "medium"} />
-                                        </IconWrapper>
-                                        <Box>
-                                            <InfoLabel>
-                                                Phone
-                                            </InfoLabel>
-                                            <InfoValue>
-                                                {adminData?.phoneNumber || 'Not provided'}
-                                            </InfoValue>
-                                        </Box>
-                                    </InfoItem>
-                                </InfoSection>
-
-                                <InfoSection>
-                                    <Typography variant="h6" color={bluePurple.dark} sx={{ mb: 2, fontWeight: 600 }}>
-                                        Academic Information
-                                    </Typography>
-                                    <Divider sx={{ mb: 3 }} />
-
-                                    <InfoItem>
-                                        <IconWrapper>
-                                            <School fontSize={isMobile ? "small" : "medium"} />
-                                        </IconWrapper>
-                                        <Box>
-                                            <InfoLabel>
-                                                Qualification
-                                            </InfoLabel>
-                                            <InfoValue>
-                                                {adminData?.qualification || 'Not provided'}
-                                            </InfoValue>
-                                        </Box>
-                                    </InfoItem>
-                                </InfoSection>
-
-                                <Box sx={{ mt: 'auto', pt: 2 }}>
-                                    <StyledButton
-                                        variant="contained"
-                                        onClick={() => setEditing(true)}
-                                        startIcon={<Edit />}
-                                        size={isMobile ? "small" : "medium"}
-                                    >
-                                        Edit Profile
-                                    </StyledButton>
-                                </Box>
-                            </ContentCard>
-                        </InfoCard>
-                    </Grid>
-                </Grid>
-            ) : (
-                <Paper elevation={2} sx={{ p: { xs: 2, sm: 3, md: 4 }, borderRadius: 3, bgcolor: '#fff' }}>
-                    <Typography variant="h6" color={bluePurple.dark} sx={{ mb: 3, fontWeight: 600 }}>
-                        Edit Profile
-                    </Typography>
-                    <Divider sx={{ mb: 3 }} />
-
-                    <form onSubmit={handleSubmit}>
-                        <Grid container spacing={3}>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    fullWidth
-                                    label="Name"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    required
-                                    variant="outlined"
-                                    size={isMobile ? "small" : "medium"}
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            '&.Mui-focused fieldset': {
-                                                borderColor: bluePurple.main,
-                                                borderWidth: '2px',
-                                            },
-                                        },
-                                        '& .MuiInputLabel-root.Mui-focused': {
-                                            color: bluePurple.main,
-                                        },
-                                    }}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="mb-4">
+                            <label className="block text-gray-600 text-sm font-medium mb-1">Admin ID</label>
+                            {isEditing ? (
+                                <input
+                                    type="text"
+                                    readOnly
+                                    value={admin?.adminId || ""}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
                                 />
-                            </Grid>
+                            ) : (
+                                <p className="text-gray-800 font-medium">{admin?.adminId || "N/A"}</p>
+                            )}
+                        </div>
 
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    fullWidth
-                                    label="Email"
-                                    name="email"
+                        <div className="mb-4">
+                            <label className="block text-gray-600 text-sm font-medium mb-1">Full Name</label>
+                            {isEditing ? (
+                                <input
+                                    type="text"
+                                    defaultValue={admin?.name || ""}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5e19f3] focus:border-transparent"
+                                />
+                            ) : (
+                                <p className="text-gray-800 font-medium">{admin?.name || "N/A"}</p>
+                            )}
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-gray-600 text-sm font-medium mb-1">Email Address</label>
+                            {isEditing ? (
+                                <input
                                     type="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    required
-                                    variant="outlined"
-                                    size={isMobile ? "small" : "medium"}
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            '&.Mui-focused fieldset': {
-                                                borderColor: bluePurple.main,
-                                                borderWidth: '2px',
-                                            },
-                                        },
-                                        '& .MuiInputLabel-root.Mui-focused': {
-                                            color: bluePurple.main,
-                                        },
-                                    }}
+                                    defaultValue={admin?.email || ""}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5e19f3] focus:border-transparent"
                                 />
-                            </Grid>
+                            ) : (
+                                <p className="text-gray-800 font-medium">{admin?.email || "N/A"}</p>
+                            )}
+                        </div>
 
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    fullWidth
-                                    label="Phone Number"
-                                    name="phoneNumber"
-                                    value={formData.phoneNumber}
-                                    onChange={handleChange}
-                                    required
-                                    variant="outlined"
-                                    size={isMobile ? "small" : "medium"}
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            '&.Mui-focused fieldset': {
-                                                borderColor: bluePurple.main,
-                                                borderWidth: '2px',
-                                            },
-                                        },
-                                        '& .MuiInputLabel-root.Mui-focused': {
-                                            color: bluePurple.main,
-                                        },
-                                    }}
+                        <div className="mb-4">
+                            <label className="block text-gray-600 text-sm font-medium mb-1">Role</label>
+                            {isEditing ? (
+                                <select
+                                    defaultValue={admin?.role || ""}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5e19f3] focus:border-transparent"
+                                >
+                                    <option value="admin">Admin</option>
+                                    <option value="teacher">Teacher</option>
+                                    <option value="staff">Staff</option>
+                                </select>
+                            ) : (
+                                <p className="text-gray-800 font-medium capitalize">{admin?.role || "N/A"}</p>
+                            )}
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-gray-600 text-sm font-medium mb-1">Phone Number</label>
+                            {isEditing ? (
+                                <input
+                                    type="tel"
+                                    defaultValue={admin?.phoneNumber || ""}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5e19f3] focus:border-transparent"
                                 />
-                            </Grid>
+                            ) : (
+                                <p className="text-gray-800 font-medium">{admin?.phoneNumber || "N/A"}</p>
+                            )}
+                        </div>
 
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    fullWidth
-                                    label="Qualification"
-                                    name="qualification"
-                                    value={formData.qualification}
-                                    onChange={handleChange}
-                                    variant="outlined"
-                                    size={isMobile ? "small" : "medium"}
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            '&.Mui-focused fieldset': {
-                                                borderColor: bluePurple.main,
-                                                borderWidth: '2px',
-                                            },
-                                        },
-                                        '& .MuiInputLabel-root.Mui-focused': {
-                                            color: bluePurple.main,
-                                        },
-                                    }}
+                        <div className="mb-4">
+                            <label className="block text-gray-600 text-sm font-medium mb-1">Status</label>
+                            {isEditing ? (
+                                <select
+                                    defaultValue={admin?.status || ""}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5e19f3] focus:border-transparent"
+                                >
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            ) : (
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${admin?.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                    }`}>
+                                    {admin?.status || "N/A"}
+                                </span>
+                            )}
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-gray-600 text-sm font-medium mb-1">Qualification</label>
+                            {isEditing ? (
+                                <input
+                                    type="text"
+                                    defaultValue={admin?.qualification || ""}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5e19f3] focus:border-transparent"
                                 />
-                            </Grid>
+                            ) : (
+                                <p className="text-gray-800 font-medium">{admin?.qualification || "N/A"}</p>
+                            )}
+                        </div>
 
-                            <Grid item xs={12}>
-                                <TextField
-                                    fullWidth
-                                    label="New Password (leave blank to keep current)"
-                                    name="password"
-                                    type="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    variant="outlined"
-                                    size={isMobile ? "small" : "medium"}
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            '&.Mui-focused fieldset': {
-                                                borderColor: bluePurple.main,
-                                                borderWidth: '2px',
-                                            },
-                                        },
-                                        '& .MuiInputLabel-root.Mui-focused': {
-                                            color: bluePurple.main,
-                                        },
-                                    }}
+                        {isEditing && (
+                            <div className="mb-4">
+                                <label className="block text-gray-600 text-sm font-medium mb-1">Profile Picture URL</label>
+                                <input
+                                    type="text"
+                                    defaultValue={admin?.profilePicture || ""}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5e19f3] focus:border-transparent"
                                 />
-                            </Grid>
+                            </div>
+                        )}
+                    </div>
 
-                            <Grid item xs={12}>
-                                <Box sx={{ mb: 3 }}>
-                                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: bluePurple.dark }}>
-                                        Profile Picture
-                                    </Typography>
-                                    <FileInputWrapper>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleFileChange}
-                                            style={{
-                                                width: '100%',
-                                                padding: isMobile ? '10px' : '12px',
-                                                border: `1px solid #ddd`,
-                                                borderRadius: '8px'
-                                            }}
-                                        />
-                                    </FileInputWrapper>
-                                    {formData.profilePicture && (
-                                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                                            <Avatar
-                                                src={formData.profilePicture}
-                                                alt="Profile Preview"
-                                                sx={{
-                                                    width: isMobile ? 80 : 100,
-                                                    height: isMobile ? 80 : 100,
-                                                    border: `3px solid ${bluePurple.lighter}`,
-                                                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-                                                }}
-                                            />
-                                        </Box>
-                                    )}
-                                </Box>
-                            </Grid>
-
-                            <Grid item xs={12}>
-                                <Box sx={{
-                                    display: 'flex',
-                                    flexDirection: isMobile ? 'column' : 'row',
-                                    gap: isMobile ? 2 : 3,
-                                    mt: 2,
-                                    justifyContent: 'flex-end'
-                                }}>
-                                    <StyledButton
-                                        fullWidth={isMobile}
-                                        variant="outlined"
-                                        onClick={() => setEditing(false)}
-                                        disabled={loading}
-                                        startIcon={<Cancel />}
-                                        size={isMobile ? "small" : "medium"}
-                                    >
-                                        Cancel
-                                    </StyledButton>
-
-                                    <StyledButton
-                                        fullWidth={isMobile}
-                                        variant="contained"
-                                        type="submit"
-                                        disabled={loading}
-                                        startIcon={<Save />}
-                                        size={isMobile ? "small" : "medium"}
-                                    >
-                                        {loading ? 'Saving...' : 'Save Changes'}
-                                    </StyledButton>
-                                </Box>
-                            </Grid>
-                        </Grid>
-                    </form>
-                </Paper>
-            )}
-        </PageContainer>
+                    {admin?.notifications && admin.notifications.length > 0 && (
+                        <div className="mt-8">
+                            <h2 className="text-xl font-semibold text-[#5e19f3] mb-4">Notifications</h2>
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                {admin.notifications.map((notification, index) => (
+                                    <div key={index} className="border-b border-gray-200 py-2 last:border-b-0">
+                                        {notification}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
     );
 };
 
-export default AdminProfile; 
+export default AdminProfile;

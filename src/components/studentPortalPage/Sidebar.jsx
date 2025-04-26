@@ -84,7 +84,7 @@ const Sidebar = () => {
     return (
         <div>
             {/* Sidebar */}
-            <div className={`${isOpenForSideBar ? 'w-64' : 'w-20'} bg-blue-600 text-white transition-all duration-300 ease-in-out transform fixed flex flex-col justify-between top-0 left-0 h-full`}>
+            <div className={`${isOpenForSideBar ? 'w-64' : 'w-20'} bg-[#4500e2] text-white transition-all duration-300 ease-in-out transform fixed flex flex-col justify-between top-0 left-0 h-full`}>
                 {/* Navigation Links */}
                 <div className="space-y-4">
                     <div className="p-4 border-b">
@@ -94,7 +94,7 @@ const Sidebar = () => {
                     </div>
                     {navLinks.map(({ to, name, icon }) => (
                         <div key={to} className="flex items-center">
-                            <Link to={to} onClick={() => setActiveItem(to)} className={`flex items-center w-full px-6 py-2 hover:bg-blue-500 cursor-pointer ${activeItem === to ? 'bg-blue-500' : ''}`}>
+                            <Link to={to} onClick={() => setActiveItem(to)} className={`flex items-center w-full px-6 py-2 hover:bg-[#6e29ff] cursor-pointer ${activeItem === to ? 'bg-[#6e29ff]' : ''}`}>
                                 <span className="mr-4">{icon}</span>
                                 <span className={`${isOpenForSideBar ? 'block' : 'hidden'} ${name === 'Logout' ? 'text-red-500' : 'text-white'} font-semibold text-md`}>{name}</span>
                             </Link>
@@ -107,7 +107,7 @@ const Sidebar = () => {
                         <img
                             src="https://avatar.iran.liara.run/public"
                             alt="User"
-                            className="w-10 h-10 transition-opacity duration-300 rounded-full opacity-100"
+                            className="w-10 h-10 transition-opacity duration-300 rounded-full opacity-100 border-2 border-white"
                             loading="lazy"
                         />
                         <div className="ml-3">

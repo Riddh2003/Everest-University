@@ -62,14 +62,14 @@ export const AuthProvider = ({ children }) => {
         try {
             setLoading(true);
             console.log("[AUTH] Attempting student login for:", enrollmentId);
-    
+
             // Send the data directly, not nested in a userData object
             const response = await axios.post('http://localhost:9999/api/public/auth/studentlogin', {
                 enrollmentId,
                 password
             });
             console.log("[AUTH] Student login response:", response);
-    
+
             if (response.status === 200 && response.data.success) {
                 const token = response.data.token;
                 localStorage.setItem('token', token);
@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
                 sessionStorage.setItem('token', token);
                 sessionStorage.setItem('role', 'student');
                 sessionStorage.setItem('enrollmentId', enrollmentId);
-    
+
                 // Get user profile - fix the API call
                 console.log('token : ', token);
                 try {
@@ -90,9 +90,9 @@ export const AuthProvider = ({ children }) => {
                             return status === 200 || status === 302;
                         }
                     });
-                    
+
                     // console.log("[AUTH] Student profile response:", studentResponse);
-                    
+
                     if (studentResponse.data) {
                         setUser({
                             ...studentResponse.data,
@@ -115,7 +115,7 @@ export const AuthProvider = ({ children }) => {
                         role: 'student'
                     });
                 }
-                
+
                 return { success: true, message: response.data.message };
             } else {
                 return { success: false, message: response.data.message || "Login failed" };
@@ -138,8 +138,10 @@ export const AuthProvider = ({ children }) => {
             // Clear any existing tokens first
             localStorage.removeItem('token');
             localStorage.removeItem('role');
+            localStorage.removeItem('email');
             sessionStorage.removeItem('token');
             sessionStorage.removeItem('role');
+            sessionStorage.removeItem('email');
             delete axios.defaults.headers.common['Authorization'];
 
             const response = await axios.post('http://localhost:9999/api/public/auth/adminlogin',
@@ -157,9 +159,16 @@ export const AuthProvider = ({ children }) => {
                 const { token, role } = response.data;
                 console.log("[AUTH] Admin login successful. Role:", role);
 
-                // Store authentication data
+                // Store authentication data in both localStorage and sessionStorage
+                // Local Storage (persistent)
                 localStorage.setItem('token', token);
                 localStorage.setItem('role', role || 'admin');
+                localStorage.setItem('email', email);
+
+                // Session Storage (for the current session)
+                sessionStorage.setItem('token', token);
+                sessionStorage.setItem('role', role || 'admin');
+                sessionStorage.setItem('email', email);
 
                 // Set default authorization header for all future requests
                 axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -173,11 +182,24 @@ export const AuthProvider = ({ children }) => {
 
                 // Verify the token was stored correctly
                 const storedToken = localStorage.getItem('token');
-                console.log("[AUTH] Stored token verification:", storedToken ? "Token saved successfully" : "Failed to save token");
+                const sessionToken = sessionStorage.getItem('token');
+                console.log("[AUTH] Token storage verification:", {
+                    localStorage: storedToken ? "Token saved successfully" : "Failed to save token",
+                    sessionStorage: sessionToken ? "Token saved successfully" : "Failed to save token"
+                });
+
+                if (!storedToken && !sessionToken) {
+                    console.error("[AUTH] Token storage failed in both localStorage and sessionStorage");
+                    return {
+                        success: false,
+                        message: 'Failed to store authentication data. Please try again.'
+                    };
+                }
 
                 return {
                     success: true,
-                    message: 'Login successful'
+                    message: 'Login successful',
+                    token: token // Return token in the result
                 };
             }
 
@@ -211,11 +233,13 @@ export const AuthProvider = ({ children }) => {
         try {
             console.log("[AUTH] Logging out user");
 
-            // Clear auth data first to ensure frontend logout succeeds even if API fails
+            // Clear auth data from both localStorage and sessionStorage
             localStorage.removeItem('token');
-            sessionStorage.removeItem('token');
             localStorage.removeItem('role');
+            localStorage.removeItem('email');
+            sessionStorage.removeItem('token');
             sessionStorage.removeItem('role');
+            sessionStorage.removeItem('email');
 
             // Reset axios default headers
             delete axios.defaults.headers.common['Authorization'];

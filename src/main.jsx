@@ -6,6 +6,11 @@ import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/NewContext'
 import 'react-toastify/dist/ReactToastify.css'
+import axios from 'axios'
+
+// Configure axios globally
+axios.defaults.withCredentials = true;
+console.log('Axios configured with withCredentials: true');
 
 createRoot(document.getElementById('root')).render(
     <BrowserRouter>

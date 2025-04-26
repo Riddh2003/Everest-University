@@ -31,7 +31,7 @@ import {
   CardContainer,
   ContentCard,
   PageContainer
-} from './AdminProfile';
+} from './AdminSharedStyles';
 
 const Student = () => {
   const [students, setStudents] = useState([]);

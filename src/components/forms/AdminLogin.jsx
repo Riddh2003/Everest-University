@@ -94,10 +94,49 @@ const AdminLogin = () => {
 
   const handleLogin = async (data) => {
     try {
+      console.log('Login attempt for:', data.email);
       const result = await adminLogin(data.email, data.password);
+      console.log('Login result:', result);
 
       if (result.success) {
-        toast.success(result.message, {
+        // Ensure email is stored in both localStorage and sessionStorage
+        localStorage.setItem('email', data.email);
+        sessionStorage.setItem('email', data.email);
+
+        // Verify tokens were properly stored
+        const storedToken = localStorage.getItem('token');
+        const sessionToken = sessionStorage.getItem('token');
+
+        console.log('Token verification:', {
+          localStorage: !!storedToken,
+          sessionStorage: !!sessionToken
+        });
+
+        if (!storedToken && !sessionToken) {
+          console.error('Token not stored after successful login');
+          if (result.token) {
+            // Try to set it directly if available
+            localStorage.setItem('token', result.token);
+            sessionStorage.setItem('token', result.token);
+          }
+        }
+
+        console.log('Auth data stored:', {
+          token: {
+            localStorage: !!localStorage.getItem('token'),
+            sessionStorage: !!sessionStorage.getItem('token')
+          },
+          role: {
+            localStorage: localStorage.getItem('role'),
+            sessionStorage: sessionStorage.getItem('role')
+          },
+          email: {
+            localStorage: localStorage.getItem('email'),
+            sessionStorage: sessionStorage.getItem('email')
+          }
+        });
+
+        toast.success(result.message || 'Login successful', {
           position: "top-center",
           autoClose: 3000
         });
@@ -106,7 +145,7 @@ const AdminLogin = () => {
           navigate("/adminportal");
         }, 3000);
       } else {
-        toast.error(result.message, {
+        toast.error(result.message || 'Login failed', {
           position: "top-center",
           autoClose: 5000
         });
