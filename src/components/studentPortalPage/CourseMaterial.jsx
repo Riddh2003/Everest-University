@@ -13,6 +13,7 @@ const CourseMaterial = () => {
             setError(null);
             try {
                 const response = await axios.get('http://localhost:9999/api/private/material/listMaterials');
+                console.log(response.data);
                 if (response.data.success) {
                     setMaterials(response.data.data || []);
                 } else {
@@ -100,7 +101,7 @@ const CourseMaterial = () => {
                                 {/* Buttons */}
                                 <div className="flex gap-3 mt-4">
                                     <a
-                                        href={material.fileUrl || material.filePath || "#"}
+                                        href={material.filePath}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="flex-1 text-center py-2 bg-[#4500e2] text-white rounded-lg hover:bg-[#3b00c0] transition-colors duration-300 shadow-md hover:shadow-lg"

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Flip, toast, ToastContainer } from "react-toastify";
 import axios from "axios";
-import Loader from "../basicComponents/Loader.jsx";
 
 const API_URL = "http://localhost:9999/api/private/admin";
 
@@ -10,6 +9,8 @@ const AdmissionsRequest = () => {
   const [admissionRequests, setAdmissionRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
   const navigate = useNavigate();
 
   // Fetch admission requests from backend
@@ -123,6 +124,18 @@ const AdmissionsRequest = () => {
     }
   };
 
+  // Handle view student details
+  const handleViewDetails = (student) => {
+    setSelectedStudent(student);
+    setShowPopup(true);
+  };
+
+  // Close popup
+  const closePopup = () => {
+    setShowPopup(false);
+    setSelectedStudent(null);
+  };
+
   // Fetch data when component loads
   useEffect(() => {
     fetchAdmissionRequests();
@@ -134,7 +147,122 @@ const AdmissionsRequest = () => {
 
       {(loading || actionLoading) && (
         <div className="fixed inset-0 flex justify-center items-center bg-white/80 z-50">
-          <Loader />
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+        </div>
+      )}
+
+      {/* Student Details Popup */}
+      {showPopup && selectedStudent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 m-4 max-w-xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-indigo-700">Student Details</h2>
+              <button
+                onClick={closePopup}
+                className="text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-gray-50 p-3 rounded">
+                <p className="text-sm font-medium text-gray-500">Registration ID</p>
+                <p className="text-base font-semibold">{selectedStudent.registrationId}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded">
+                <p className="text-sm font-medium text-gray-500">Full Name</p>
+                <p className="text-base font-semibold">{`${selectedStudent.firstName} ${selectedStudent.middleName} ${selectedStudent.surName}`}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded">
+                <p className="text-sm font-medium text-gray-500">Email</p>
+                <p className="text-base font-semibold">{selectedStudent.email}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded">
+                <p className="text-sm font-medium text-gray-500">Mobile</p>
+                <p className="text-base font-semibold">{selectedStudent.mobileNo}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded">
+                <p className="text-sm font-medium text-gray-500">Gender</p>
+                <p className="text-base font-semibold">{selectedStudent.gender}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded">
+                <p className="text-sm font-medium text-gray-500">Date of Birth</p>
+                <p className="text-base font-semibold">{new Date(selectedStudent.dateOfBirth).toLocaleDateString()}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded">
+                <p className="text-sm font-medium text-gray-500">City</p>
+                <p className="text-base font-semibold">{selectedStudent.city}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded">
+                <p className="text-sm font-medium text-gray-500">State</p>
+                <p className="text-base font-semibold">{selectedStudent.state}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded">
+                <p className="text-sm font-medium text-gray-500">Program</p>
+                <p className="text-base font-semibold">{selectedStudent.program}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded">
+                <p className="text-sm font-medium text-gray-500">Degree</p>
+                <p className="text-base font-semibold">{selectedStudent.degree}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded col-span-1 md:col-span-2">
+                <p className="text-sm font-medium text-gray-500">Degree Name</p>
+                <p className="text-base font-semibold">{selectedStudent.degreeName}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded col-span-1 md:col-span-2">
+                <p className="text-sm font-medium text-gray-500">10th Certificate</p>
+                {selectedStudent.tenthFilePath ? (
+                  <a
+                    href={selectedStudent.tenthFilePath}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 hover:underline"
+                  >
+                    View 10th Certificate
+                  </a>
+                ) : (
+                  <p className="text-gray-500 italic">Not available</p>
+                )}
+              </div>
+              <div className="bg-gray-50 p-3 rounded col-span-1 md:col-span-2">
+                <p className="text-sm font-medium text-gray-500">12th Certificate</p>
+                {selectedStudent.twelthPath ? (
+                  <a
+                    href={selectedStudent.twelthPath}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 hover:underline"
+                  >
+                    View 12th Certificate
+                  </a>
+                ) : (
+                  <p className="text-gray-500 italic">Not available</p>
+                )}
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  closePopup();
+                  handleAdmissionAction(selectedStudent, "approve");
+                }}
+                className="px-4 py-2 bg-green-600 text-white font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
+                Approve
+              </button>
+              <button
+                onClick={() => {
+                  closePopup();
+                  handleAdmissionAction(selectedStudent, "reject");
+                }}
+                className="px-4 py-2 bg-red-600 text-white font-medium rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+              >
+                Reject
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -191,6 +319,12 @@ const AdmissionsRequest = () => {
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
                             <div className="flex justify-center space-x-2">
+                              <button
+                                className="px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                onClick={() => handleViewDetails(request)}
+                              >
+                                View
+                              </button>
                               <button
                                 className="px-3 py-1 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
                                 onClick={() => handleAdmissionAction(request, "approve")}

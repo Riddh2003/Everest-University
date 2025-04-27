@@ -15,11 +15,11 @@ const AcedmicProg = () => {
                         <h1 className="text-3xl font-semibold">Academic Programs</h1>
                         <p className="p-8 text-xl ">Discover our comprehensive range of programs designed for your success</p>
                         <div className="flex items-center justify-center w-full gap-4 text-xl">
-                                <button className={`rounded-full p-2 md:w-1/6 sm:w-1/4 sm:text-base text-lg hover:bg-[#5CB338] hover:text-white bg-white ${selectDegree === "undergraduate" ? `bg-[#5CB338] text-white` : "bg-white text-[#0d9488]"}`} onClick={showUndergraduate}>Undergraduate</button>
+                                <button className={`rounded-full p-2 md:w-1/6 sm:w-1/4 sm:text-base text-lg hover:bg-[#5CB338] hover:text-white ${selectDegree == "Undergraduate" ? `bg-[#5CB338] text-white` : "bg-white text-[#5CB338]"}`} onClick={showUndergraduate}>Undergraduate</button>
 
-                                <button className={`rounded-full p-2 md:w-1/6 sm:w-1/4 sm:text-base text-lg  hover:bg-[#5CB338] hover:text-white bg-white ${selectDegree === "postgraduate" ? `bg-[#5CB338] text-white` : "bg-white text-[#0d9488]"} `} onClick={showPostgraduate}>Postgraduate</button>
+                                <button className={`rounded-full p-2 md:w-1/6 sm:w-1/4 sm:text-base text-lg  hover:bg-[#5CB338] hover:text-white ${selectDegree == "Postgraduate" ? `bg-[#5CB338] text-white` : "bg-white text-[#5CB338]"} `} onClick={showPostgraduate}>Postgraduate</button>
 
-                                <button className={`rounded-full p-2 md:w-1/6 sm:w-1/4 sm:text-base text-lg  hover:bg-[#5CB338] hover:text-white bg-white ${selectDegree === 'integrated' ? `bg-[#5CB338] text-white` : "bg-white text-[#0d9488]"}`} onClick={showIntegrated}>Integrated</button>
+                                <button className={`rounded-full p-2 md:w-1/6 sm:w-1/4 sm:text-base text-lg  hover:bg-[#5CB338] hover:text-white ${selectDegree === 'Integrated' ? `bg-[#5CB338] text-white` : "bg-white text-[#5CB338]"}`} onClick={showIntegrated}>Integrated</button>
                         </div >
                         <div className='mt-5 grid  grid-flow-col auto-cols-[minmax(210px,1fr)] sm:p-2 xl:auto-cols-[minmax(400px,1fr)] gap-5 xl:p-4 overflow-x-auto scrollbar-hide [&::-webkit-scrollbar]:hidden w-full'>
 

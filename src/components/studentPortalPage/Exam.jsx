@@ -1,98 +1,204 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+const API_URL = "http://localhost:9999/api/private/student";
 
 const Exam = () => {
-    // Sample data for exam details (replace with API data if needed)
-    const [exams, setExams] = useState([
-        {
-            id: 1,
-            subject: 'Mathematics',
-            date: '2025-03-15',
-            time: '10:00 AM - 12:00 PM',
-            duration: '2 hours',
-            venue: 'Room A1',
-            status: 'Scheduled',
-        },
-        {
-            id: 2,
-            subject: 'Physics',
-            date: '2025-03-18',
-            time: '2:00 PM - 4:00 PM',
-            duration: '2 hours',
-            venue: 'Room B2',
-            status: 'Completed',
-        },
-        {
-            id: 3,
-            subject: 'Chemistry',
-            date: '2025-03-20',
-            time: '9:00 AM - 11:00 AM',
-            duration: '2 hours',
-            venue: 'Room C3',
-            status: 'Scheduled',
-        },
-    ]);
+    const [results, setResults] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [filteredResults, setFilteredResults] = useState([]);
+    const [selectedSemester, setSelectedSemester] = useState('all');
+    const [semesters, setSemesters] = useState([]);
 
     useEffect(() => {
-        // Fetch exam details from API if needed
+        fetchResults();
     }, []);
 
+    // Filter results when selectedSemester changes
+    useEffect(() => {
+        filterResults();
+    }, [selectedSemester, results]);
+
+    const fetchResults = async () => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem("token");
+            const enrollmentId = localStorage.getItem("enrollmentId");
+
+            if (!token || !enrollmentId) {
+                toast.error("Please login first");
+                return;
+            }
+
+            const response = await axios.get(`${API_URL}/getresults`, {
+                params: { enrollmentId },
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            console.log(response.data);
+            if (response.data.success) {
+                const resultData = response.data.data;
+                setResults(resultData);
+
+                // Extract unique semesters for filter
+                const uniqueSemesters = [...new Set(resultData.map(result => result.semNumber))].sort((a, b) => a - b);
+                setSemesters(uniqueSemesters);
+            } else {
+                toast.warning(response.data.message || "No results found");
+            }
+        } catch (error) {
+            console.error("Error fetching results:", error);
+            toast.error("Failed to fetch exam results");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const filterResults = () => {
+        if (selectedSemester === 'all') {
+            setFilteredResults(results);
+        } else {
+            const filtered = results.filter(result => result.semNumber === parseInt(selectedSemester));
+            setFilteredResults(filtered);
+        }
+    };
+
+    const handleSemesterChange = (e) => {
+        setSelectedSemester(e.target.value);
+    };
+
+    // Function to determine appropriate color for grade display
+    const getGradeColor = (grade) => {
+        switch (grade) {
+            case 'A':
+            case 'A+': return 'text-green-600';
+            case 'B':
+            case 'B+': return 'text-blue-600';
+            case 'C':
+            case 'C+': return 'text-yellow-600';
+            case 'D': return 'text-orange-600';
+            case 'F': return 'text-red-600';
+            default: return 'text-gray-600';
+        }
+    };
+
     return (
-        <div className="overflow-x-auto px-4">
-            <h2 className="text-xl font-bold mb-4 text-blue-500">Exam Details</h2>
+        <div className="overflow-x-auto px-4 pb-6">
+            <ToastContainer position="top-center" autoClose={3000} />
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+                <h2 className="text-xl font-bold text-[#4500e2] mb-3 sm:mb-0">Examination Results</h2>
 
-            {/* Table View for Larger Screens */}
-            <table className="min-w-full table-auto hidden md:table">
-                <thead className="bg-blue-500">
-                    <tr className='text-white'>
-                        <th className="px-6 py-3 text-lg text-left">Subject</th>
-                        <th className="px-6 py-3 text-lg text-left">Date</th>
-                        <th className="px-6 py-3 text-lg text-left">Time</th>
-                        <th className="px-6 py-3 text-lg text-left">Duration</th>
-                        <th className="px-6 py-3 text-lg text-left">Venue</th>
-                        <th className="px-6 py-3 text-lg text-left">Status</th>
-                    </tr>
-                </thead>
-                <tbody className="bg-white">
-                    {exams.map((exam) => (
-                        <tr key={exam.id} className="border-b hover:bg-gray-100">
-                            <td className="px-6 py-4">{exam.subject}</td>
-                            <td className="px-6 py-4">{exam.date}</td>
-                            <td className="px-6 py-4">{exam.time}</td>
-                            <td className="px-6 py-4">{exam.duration}</td>
-                            <td className="px-6 py-4">{exam.venue}</td>
-                            <td className="px-6 py-4">
-                                <span
-                                    className={`${exam.status === 'Scheduled'
-                                        ? 'text-blue-500'
-                                        : 'text-green-500'
-                                        } font-semibold`}
-                                >
-                                    {exam.status}
-                                </span>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-
-            {/* Responsive Card View for Mobile Screens */}
-            <div className="md:hidden mt-6 space-y-4">
-                {exams.map((exam) => (
-                    <div key={exam.id} className="bg-white p-4 border rounded-lg shadow-md">
-                        <h3 className="text-lg font-bold mb-2">{exam.subject}</h3>
-                        <p><strong>Date:</strong> {exam.date}</p>
-                        <p><strong>Time:</strong> {exam.time}</p>
-                        <p><strong>Duration:</strong> {exam.duration}</p>
-                        <p><strong>Venue:</strong> {exam.venue}</p>
-                        <p>
-                            <strong>Status:</strong>{' '}
-                            <span className={exam.status === 'Scheduled' ? 'text-blue-500' : 'text-green-500'}>
-                                {exam.status}
-                            </span>
-                        </p>
+                {/* Semester Filter */}
+                {semesters.length > 0 && (
+                    <div className="flex items-center">
+                        <label htmlFor="semesterFilter" className="mr-2 text-gray-700 font-medium">Filter by Semester:</label>
+                        <select
+                            id="semesterFilter"
+                            value={selectedSemester}
+                            onChange={handleSemesterChange}
+                            className="border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#4500e2]"
+                        >
+                            <option value="all">All Semesters</option>
+                            {[1, 2, 3, 4, 5, 6, 7, 8].map(sem => (
+                                <option key={sem} value={sem}>Semester {sem}</option>
+                            ))}
+                        </select>
                     </div>
-                ))}
+                )}
             </div>
+
+            {loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#4500e2]"></div>
+                </div>
+            ) : results.length === 0 ? (
+                <div className="text-center py-8 bg-white rounded-lg shadow">
+                    <p className="text-gray-500">No examination results available</p>
+                </div>
+            ) : filteredResults.length === 0 ? (
+                <div className="text-center py-8 bg-white rounded-lg shadow">
+                    <p className="text-gray-500">No results for the selected semester</p>
+                </div>
+            ) : (
+                <>
+                    {/* Table View for Larger Screens */}
+                    <div className="overflow-hidden rounded-lg shadow-lg">
+                        <table className="min-w-full table-auto hidden sm:table bg-white">
+                            <thead className="bg-[#4500e2]">
+                                <tr className="text-white">
+                                    <th className="px-4 py-3 text-left text-sm font-medium">Subject</th>
+                                    <th className="px-4 py-3 text-left text-sm font-medium">Semester</th>
+                                    <th className="px-4 py-3 text-center text-sm font-medium">Marks</th>
+                                    <th className="px-4 py-3 text-center text-sm font-medium">Grade</th>
+                                    <th className="px-4 py-3 text-center text-sm font-medium">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredResults.map((result) => (
+                                    <tr key={result.resultId} className="border-b hover:bg-gray-50">
+                                        <td className="px-4 py-3 text-sm">{result.subjectName}</td>
+                                        <td className="px-4 py-3 text-sm">Semester {result.semNumber}</td>
+                                        <td className="px-4 py-3 text-center text-sm">
+                                            {result.marksObtained} / {result.totalMarks}
+                                            <span className="text-xs text-gray-500 ml-1">
+                                                ({((result.marksObtained / result.totalMarks) * 100).toFixed(1)}%)
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-center text-sm">
+                                            <span className={`font-bold ${getGradeColor(result.grade)}`}>
+                                                {result.grade}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-center text-sm">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium 
+                                                ${result.resultStatus === 'PASS'
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-red-100 text-red-800'}`}>
+                                                {result.resultStatus}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Responsive Card View for Mobile Screens */}
+                    <div className="sm:hidden mt-4 grid grid-cols-1 gap-4">
+                        {filteredResults.map((result) => (
+                            <div key={result.resultId} className="bg-white p-4 border rounded-lg shadow-md">
+                                <div className="flex justify-between items-start">
+                                    <h3 className="text-lg font-bold text-[#4500e2]">{result.subjectName}</h3>
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium 
+                                        ${result.resultStatus === 'PASS'
+                                            ? 'bg-green-100 text-green-800'
+                                            : 'bg-red-100 text-red-800'}`}>
+                                        {result.resultStatus}
+                                    </span>
+                                </div>
+                                <p className="text-sm text-gray-600 mt-1">Semester {result.semNumber}</p>
+                                <div className="mt-3 flex justify-between items-center">
+                                    <div>
+                                        <p className="text-sm font-medium text-[#4500e2]">Marks:</p>
+                                        <p>{result.marksObtained} / {result.totalMarks}</p>
+                                        <p className="text-xs text-gray-500">
+                                            ({((result.marksObtained / result.totalMarks) * 100).toFixed(1)}%)
+                                        </p>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-sm font-medium text-[#4500e2]">Grade:</p>
+                                        <p className={`text-xl font-bold ${getGradeColor(result.grade)}`}>
+                                            {result.grade}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </>
+            )}
         </div>
     );
 };
