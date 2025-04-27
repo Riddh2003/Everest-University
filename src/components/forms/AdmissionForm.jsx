@@ -176,7 +176,11 @@ const AdmissionForm = () => {
       <ToastContainer position="top-center" autoClose={3000} />
 
       <Container className="p-5 w-full max-w-4xl mx-auto">
-        {isLoading && <Loader />}
+        {isLoading && (
+          <div className="fixed inset-0 flex justify-center items-center bg-white/80 z-50">
+            <Loader />
+          </div>
+        )}
         <Paper className="p-5 shadow-lg rounded-lg bg-white border border-[#345d7c]">
           <Typography variant="h4" className="text-center font-semibold text-2xl text-[#5CB338] mb-4">
             Student Registration

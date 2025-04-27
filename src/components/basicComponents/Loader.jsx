@@ -4,108 +4,129 @@ import styled from 'styled-components';
 const Loader = () => {
   return (
     <StyledWrapper>
-      <div className="cube-loader">
-        <div className="cube-top" />
-        <div className="cube-wrapper">
-          <span style={{ "--i": 0 }} className="cube-span" />
-          <span style={{ "--i": 1 }} className="cube-span" />
-          <span style={{ "--i": 2 }} className="cube-span" />
-          <span style={{ "--i": 3 }} className="cube-span" />
+      <div className="loader">
+        <div className="box">
+          <div className="logo">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 94 94" className="svg">
+              <path d="M38.0481 4.82927C38.0481 2.16214 40.018 0 42.4481 0H51.2391C53.6692 0 55.6391 2.16214 55.6391 4.82927V40.1401C55.6391 48.8912 53.2343 55.6657 48.4248 60.4636C43.6153 65.2277 36.7304 67.6098 27.7701 67.6098C18.8099 67.6098 11.925 65.2953 7.11548 60.6663C2.37183 56.0036 3.8147e-06 49.2967 3.8147e-06 40.5456V4.82927C3.8147e-06 2.16213 1.96995 0 4.4 0H13.2405C15.6705 0 17.6405 2.16214 17.6405 4.82927V39.1265C17.6405 43.7892 18.4805 47.2018 20.1605 49.3642C21.8735 51.5267 24.4759 52.6079 27.9678 52.6079C31.4596 52.6079 34.0127 51.5436 35.6268 49.4149C37.241 47.2863 38.0481 43.8399 38.0481 39.0758V4.82927Z" />
+              <path d="M86.9 61.8682C86.9 64.5353 84.9301 66.6975 82.5 66.6975H73.6595C71.2295 66.6975 69.2595 64.5353 69.2595 61.8682V4.82927C69.2595 2.16214 71.2295 0 73.6595 0H82.5C84.9301 0 86.9 2.16214 86.9 4.82927V61.8682Z" />
+              <path d="M2.86102e-06 83.2195C2.86102e-06 80.5524 1.96995 78.3902 4.4 78.3902H83.6C86.0301 78.3902 88 80.5524 88 83.2195V89.1707C88 91.8379 86.0301 94 83.6 94H4.4C1.96995 94 0 91.8379 0 89.1707L2.86102e-06 83.2195Z" />
+            </svg>
+          </div>
         </div>
+        <div className="box" />
+        <div className="box" />
+        <div className="box" />
+        <div className="box" />
       </div>
     </StyledWrapper>
   );
 }
 
 const StyledWrapper = styled.div`
-  position: fixed; /* Fixed position to stay in the center of the screen */
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999; /* Ensure it appears above other content */
 
-  /* Blurred background */
-  background-color: rgba(0, 0, 0, 0.4); /* semi-transparent dark background */
-  backdrop-filter: blur(5px); /* Apply blur effect on the background */
-
-  .cube-loader {
-    position: relative;
-    width: 75px;
-    height: 75px;
-    transform-style: preserve-3d;
-    transform: rotateX(-30deg);
-    animation: animate 4s linear infinite;
-  }
-
-  @keyframes animate {
-    0% {
-      transform: rotateX(-30deg) rotateY(0);
-    }
-
-    100% {
-      transform: rotateX(-30deg) rotateY(360deg);
-    }
-  }
-
-  .cube-loader .cube-wrapper {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    transform-style: preserve-3d;
-  }
-
-  .cube-loader .cube-wrapper .cube-span {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    transform: rotateY(calc(90deg * var(--i))) translateZ(37.5px);
-    background: linear-gradient(
-      to bottom,
-      hsl(330, 3.13%, 25.1%) 0%,
-      hsl(177.27, 21.71%, 32.06%) 5.5%,
-      hsl(176.67, 34.1%, 36.88%) 12.1%,
-      hsl(176.61, 42.28%, 40.7%) 19.6%,
-      hsl(176.63, 48.32%, 43.88%) 27.9%,
-      hsl(176.66, 53.07%, 46.58%) 36.6%,
-      hsl(176.7, 56.94%, 48.91%) 45.6%,
-      hsl(176.74, 62.39%, 50.91%) 54.6%,
-      hsl(176.77, 69.86%, 52.62%) 63.4%,
-      hsl(176.8, 76.78%, 54.08%) 71.7%,
-      hsl(176.83, 83.02%, 55.29%) 79.4%,
-      hsl(176.85, 88.44%, 56.28%) 86.2%,
-      hsl(176.86, 92.9%, 57.04%) 91.9%,
-      hsl(176.88, 96.24%, 57.59%) 96.3%,
-      hsl(176.88, 98.34%, 57.93%) 99%,
-      hsl(176.89, 99.07%, 58.04%) 100%
+  .loader {
+    --size: min(250px, 70vw);
+    --duration: 2s;
+    --logo-color: #5cb338;
+    --background: linear-gradient(
+      0deg,
+      rgba(92, 179, 56, 0.1) 0%,
+      rgba(92, 179, 56, 0.2) 100%
     );
+    height: var(--size);
+    aspect-ratio: 1;
+    position: relative;
   }
 
-  .cube-top {
+  .loader .box {
     position: absolute;
-    width: 75px;
-    height: 75px;
-    background: hsl(330, 3.13%, 25.1%) 0%;
-    transform: rotateX(90deg) translateZ(37.5px);
-    transform-style: preserve-3d;
+    background: rgba(92, 179, 56, 0.08);
+    background: var(--background);
+    border-radius: 50%;
+    border-top: 1px solid rgba(92, 179, 56, 0.8);
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 10px -0px;
+    backdrop-filter: blur(5px);
+    animation: ripple var(--duration) infinite ease-in-out;
   }
 
-  .cube-top::before {
-    content: '';
-    position: absolute;
-    width: 75px;
-    height: 75px;
-    background: hsl(176.61, 42.28%, 40.7%) 19.6%;
-    transform: translateZ(-90px);
-    filter: blur(10px);
-    box-shadow: 0 0 10px #323232,
-                0 0 20px hsl(176.61, 42.28%, 40.7%) 19.6%,
-                0 0 30px #323232,
-                0 0 40px hsl(176.61, 42.28%, 40.7%) 19.6%;
+  .loader .box:nth-child(1) {
+    inset: 40%;
+    z-index: 99;
   }
-`;
+
+  .loader .box:nth-child(2) {
+    inset: 30%;
+    z-index: 98;
+    border-color: rgba(92, 179, 56, 0.7);
+    animation-delay: 0.2s;
+  }
+
+  .loader .box:nth-child(3) {
+    inset: 20%;
+    z-index: 97;
+    border-color: rgba(92, 179, 56, 0.6);
+    animation-delay: 0.4s;
+  }
+
+  .loader .box:nth-child(4) {
+    inset: 10%;
+    z-index: 96;
+    border-color: rgba(92, 179, 56, 0.4);
+    animation-delay: 0.6s;
+  }
+
+  .loader .box:nth-child(5) {
+    inset: 0%;
+    z-index: 95;
+    border-color: rgba(92, 179, 56, 0.2);
+    animation-delay: 0.8s;
+  }
+
+  .loader .logo {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    padding: 30%;
+  }
+
+  .loader .logo svg {
+    fill: var(--logo-color);
+    width: 100%;
+    animation: color-change var(--duration) infinite ease-in-out;
+  }
+
+  @keyframes ripple {
+    0% {
+      transform: scale(1);
+      box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 10px -0px;
+    }
+    50% {
+      transform: scale(1.3);
+      box-shadow: rgba(0, 0, 0, 0.2) 0px 30px 20px -0px;
+    }
+    100% {
+      transform: scale(1);
+      box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 10px -0px;
+    }
+  }
+
+  @keyframes color-change {
+    0% {
+      fill: var(--logo-color);
+    }
+    50% {
+      fill: white;
+    }
+    100% {
+      fill: var(--logo-color);
+    }
+  }`;
 
 export default Loader;

@@ -12,7 +12,6 @@ import MyProfile from "./components/studentPortalPage/MyProfile.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
 import Professors from "./components/adminPage/Professors.jsx";
 import Student from "./components/adminPage/Student.jsx";
-import Courses from "./components/adminPage/Courses.jsx";
 import Circulation from "./components/adminPage/Circulation.jsx";
 import AlumniNetwork from "./components/Home/Alumni Network/AlumniNetwork.jsx";
 import AlumniCard from "./components/Home/Alumni Network/AlumniCard.jsx";
@@ -28,6 +27,8 @@ import Management from "./components/Home/Program/Management.jsx";
 import SubjectInfo from "./components/Home/Program/SubjectInfo.jsx";
 import AdmissionsRequest from "./components/adminPage/AdmissionsRequest.jsx";
 import AdminProfile from "./components/adminPage/AdminProfile.jsx";
+import AdmissionForm from "./components/forms/AdmissionForm.jsx";
+import AdminCoursesMaterial from "./components/adminPage/AdminCoursesMaterial.jsx";
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
         <Route path="/Management" element={<Management />}></Route>
         <Route path="/SubjectInfo" element={<SubjectInfo />}></Route>
         <Route path="/admissionpage" element={<AdmissionPage />}></Route>
+        <Route path="/admissionform" element={<AdmissionForm />}></Route>
 
 
         {/* Student Portal Routes */}
@@ -70,7 +72,7 @@ function App() {
             <Route path="professors" element={<Professors />} />
             <Route path="student" element={<Student />} />
             <Route path="admissionrequest" element={<AdmissionsRequest />}></Route>
-            <Route path="courses" element={<Courses />} />
+            <Route path="coursesmaterial" element={<AdminCoursesMaterial />} />
             <Route path="circulation" element={<Circulation />} />
           </Route>
         </Route>

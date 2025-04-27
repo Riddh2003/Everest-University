@@ -171,6 +171,7 @@ const StudentLogin = () => {
         backgroundRepeat: 'no-repeat'
       }}
     >
+      <ToastContainer position="top-center" autoClose={3000} transition={Flip} />
       {/* Update the form container styling */}
       <div className="w-full max-w-md p-8 bg-white/40 rounded-lg shadow-xl backdrop-blur-md">
         <div className="flex flex-col items-center text-[#466845] mb-6">
@@ -245,8 +246,152 @@ const StudentLogin = () => {
           </form>
         )}
 
-        {/* Apply similar styling to forgot password and OTP forms */}
-        {/* Update the className attributes for labels and inputs in these forms with the same styling */}
+        {/* Forgot Password Form */}
+        {showForgotPassword && !showOtpForm && (
+          <form onSubmit={handleSubmitForgot(handleSendOtp)} className="space-y-6">
+            <div>
+              <label htmlFor="enrollmentId" className="block text-[#466845] text-sm font-semibold">
+                Enrollment ID
+              </label>
+              <input
+                type="text"
+                id="enrollmentId"
+                placeholder="Enter your enrollment ID"
+                {...registerForgot("enrollmentId", { required: "Enrollment ID is required" })}
+                className="w-full px-4 py-3 mt-1 border border-white/20 rounded-md bg-white/30 backdrop-blur-sm text-[#466845] placeholder-[#466845] focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
+              />
+              {errorsForgot.enrollmentId && (
+                <p className="mt-1 text-sm text-red-200">{errorsForgot.enrollmentId.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="email" className="block text-[#466845] text-sm font-semibold">
+                Email Address
+              </label>
+              <input
+                type="email"
+                id="email"
+                placeholder="Enter your email address"
+                {...registerForgot("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                    message: "Invalid email format",
+                  }
+                })}
+                className="w-full px-4 py-3 mt-1 border border-white/20 rounded-md bg-white/30 backdrop-blur-sm text-[#466845] placeholder-[#466845] focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
+              />
+              {errorsForgot.email && (
+                <p className="mt-1 text-sm text-red-200">{errorsForgot.email.message}</p>
+              )}
+            </div>
+
+            <div className="flex space-x-4">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="flex-1 px-4 py-3 text-white bg-[#466845] rounded-md hover:bg-[#35533b] focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-indigo-700/50 disabled:opacity-50 transition-colors duration-300"
+              >
+                {isLoading ? "Sending..." : "Send OTP"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(false)}
+                className="flex-1 px-4 py-3 text-[#466845] bg-white/50 rounded-md hover:bg-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-indigo-700/50 transition-colors duration-300"
+              >
+                Back to Login
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* OTP and New Password Form */}
+        {showOtpForm && (
+          <form onSubmit={handleSubmitOtp(handleResetPassword)} className="space-y-6">
+            <div>
+              <label htmlFor="otp" className="block text-[#466845] text-sm font-semibold">
+                OTP Code
+              </label>
+              <input
+                type="text"
+                id="otp"
+                placeholder="Enter the OTP sent to your email"
+                {...registerOtp("otp", {
+                  required: "OTP is required",
+                  pattern: {
+                    value: /^[0-9]{4,6}$/,
+                    message: "OTP must be 4-6 digits",
+                  }
+                })}
+                className="w-full px-4 py-3 mt-1 border border-white/20 rounded-md bg-white/30 backdrop-blur-sm text-[#466845] placeholder-[#466845] focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
+              />
+              {errorsOtp.otp && (
+                <p className="mt-1 text-sm text-red-200">{errorsOtp.otp.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="enrollmentId" className="block text-[#466845] text-sm font-semibold">
+                Enrollment ID
+              </label>
+              <input
+                type="text"
+                id="enrollmentId"
+                placeholder="Confirm your enrollment ID"
+                {...registerOtp("enrollmentId", { required: "Enrollment ID is required" })}
+                className="w-full px-4 py-3 mt-1 border border-white/20 rounded-md bg-white/30 backdrop-blur-sm text-[#466845] placeholder-[#466845] focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
+              />
+              {errorsOtp.enrollmentId && (
+                <p className="mt-1 text-sm text-red-200">{errorsOtp.enrollmentId.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="newPassword" className="block text-[#466845] text-sm font-semibold">
+                New Password
+              </label>
+              <input
+                type="password"
+                id="newPassword"
+                placeholder="Enter new password"
+                {...registerOtp("newPassword", {
+                  required: "New password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 6 characters",
+                  }
+                })}
+                className="w-full px-4 py-3 mt-1 border border-white/20 rounded-md bg-white/30 backdrop-blur-sm text-[#466845] placeholder-[#466845] focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
+              />
+              {errorsOtp.newPassword && (
+                <p className="mt-1 text-sm text-red-200">{errorsOtp.newPassword.message}</p>
+              )}
+            </div>
+
+            <div className="flex space-x-4">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="flex-1 px-4 py-3 text-white bg-[#466845] rounded-md hover:bg-[#35533b] focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-indigo-700/50 disabled:opacity-50 transition-colors duration-300"
+              >
+                {isLoading ? "Resetting..." : "Reset Password"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowOtpForm(false);
+                  setShowForgotPassword(true);
+                }}
+                className="flex-1 px-4 py-3 text-[#466845] bg-white/50 rounded-md hover:bg-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-indigo-700/50 transition-colors duration-300"
+              >
+                Back
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

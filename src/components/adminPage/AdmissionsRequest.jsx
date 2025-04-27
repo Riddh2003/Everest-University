@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Flip, toast, ToastContainer } from "react-toastify";
 import axios from "axios";
+import Loader from "../basicComponents/Loader.jsx";
 
 const API_URL = "http://localhost:9999/api/private/admin";
 
@@ -50,9 +51,42 @@ const AdmissionsRequest = () => {
       setActionLoading(true);
       const token = localStorage.getItem("token");
 
+      // Format the request payload based on the action
+      let payload;
+      let endpoint;
+
+      if (action === "approve") {
+        // For approve endpoint, we send the StudentDto structure
+        endpoint = `${API_URL}/approve`;
+        payload = {
+          registrationId: request.registrationId,
+          firstName: request.firstName,
+          middleName: request.middleName,
+          surName: request.surName,
+          email: request.email,
+          mobileNo: request.mobileNo,
+          gender: request.gender,
+          dateOfBirth: request.dateOfBirth,
+          city: request.city,
+          state: request.state,
+          program: request.program,
+          degree: request.degree,
+          degreeName: request.degreeName
+        };
+      } else {
+        // For reject endpoint, we only need registrationId
+        endpoint = `${API_URL}/reject`;
+        payload = {
+          registrationId: request.registrationId
+        };
+      }
+
+      // Log the payload for debugging
+      console.log(`Sending ${action} request with payload:`, payload);
+
       const response = await axios.post(
-        `${API_URL}/${action}`,
-        request, // Send full request data
+        endpoint,
+        payload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -71,7 +105,19 @@ const AdmissionsRequest = () => {
       }
     } catch (error) {
       console.error(`${action} Error:`, error);
-      toast.error(error.response?.data?.message || `Failed to ${action} admission`);
+
+      // Provide detailed error information in console
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+      }
+
+      // User-friendly error message
+      const errorMessage = error.response?.data?.message ||
+        (error.response?.status === 500 ?
+          "Server error. Please check server logs for details." :
+          `Failed to ${action} admission`);
+      toast.error(errorMessage);
     } finally {
       setActionLoading(false);
     }
@@ -86,6 +132,12 @@ const AdmissionsRequest = () => {
     <div className="w-full">
       <ToastContainer position="top-center" autoClose={3000} transition={Flip} />
 
+      {(loading || actionLoading) && (
+        <div className="fixed inset-0 flex justify-center items-center bg-white/80 z-50">
+          <Loader />
+        </div>
+      )}
+
       <div className="min-h-screen px-4 py-6">
         <div className="">
           <h1 className="text-2xl md:text-3xl font-bold text-indigo-700 text-center mb-8">
@@ -93,9 +145,7 @@ const AdmissionsRequest = () => {
           </h1>
 
           {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
-            </div>
+            <div className="h-64"></div>
           ) : (
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="overflow-x-auto">
@@ -146,14 +196,14 @@ const AdmissionsRequest = () => {
                                 onClick={() => handleAdmissionAction(request, "approve")}
                                 disabled={actionLoading}
                               >
-                                {actionLoading ? "Processing..." : "Approve"}
+                                Approve
                               </button>
                               <button
                                 className="px-3 py-1 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
                                 onClick={() => handleAdmissionAction(request, "reject")}
                                 disabled={actionLoading}
                               >
-                                {actionLoading ? "Processing..." : "Reject"}
+                                Reject
                               </button>
                             </div>
                           </td>

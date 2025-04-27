@@ -1,11 +1,45 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import useTheme from '../../context/NewContext'; // Import useTheme to access context for managing the sidebar state
+import { toast } from 'react-toastify';
 
 const Sidebar = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const [activeItem, setActiveItem] = useState(location.pathname);
     const { isOpenForSideBar, toggleSidebar } = useTheme();
+
+    // Handle logout function
+    const handleLogout = (e) => {
+        e.preventDefault();
+
+        try {
+            // Clear all localStorage items
+            localStorage.removeItem('token');
+            localStorage.removeItem('enrollmentId');
+            localStorage.removeItem('role');
+            localStorage.removeItem('email');
+            localStorage.removeItem('name');
+
+            // Clear any sessionStorage items if they exist
+            sessionStorage.clear();
+
+            // Show success toast
+            toast.success("Logged out successfully", {
+                position: "top-center",
+                autoClose: 2000
+            });
+
+            // Navigate to login page
+            navigate('/studentlogin');
+        } catch (error) {
+            console.error("Logout error:", error);
+            toast.error("Error during logout", {
+                position: "top-center",
+                autoClose: 3000
+            });
+        }
+    };
 
     const navLinks = [
         {
@@ -69,8 +103,9 @@ const Sidebar = () => {
             ),
         },
         {
-            to: '/',
+            to: '#',
             name: 'Logout',
+            onClick: handleLogout,
             icon: (
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="red" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-log-out">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -86,8 +121,8 @@ const Sidebar = () => {
             {/* Sidebar */}
             <div className={`${isOpenForSideBar ? 'w-64' : 'w-20'} bg-[#4500e2] text-white transition-all duration-300 ease-in-out transform fixed flex flex-col justify-between top-0 left-0 h-full`}>
                 {/* Navigation Links */}
-                <div className="space-y-4">
-                    <div className="pt-2 text-center">
+                <div className="space-y-1">
+                    <div className="pt-3 text-center">
                         <div className="flex justify-center mb-3">
                             <img
                                 src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnk_mHU60ab1ecR7UEdEBTMOebiqbSDtXJtQ&s"
@@ -95,18 +130,33 @@ const Sidebar = () => {
                                 className="h-16 rounded bg-white p-1 shadow-md"
                             />
                         </div>
-                        <div className="p-4 border-b border-indigo-300">
+                        <div className="pb-4 border-b border-indigo-300">
                             <Link to='/studentportal' className="text-2xl font-bold">
                                 Student Portal
                             </Link>
                         </div>
                     </div>
-                    {navLinks.map(({ to, name, icon }) => (
-                        <div key={to} className="flex items-center">
-                            <Link to={to} onClick={() => setActiveItem(to)} className={`flex items-center w-full px-6 py-2 hover:bg-[#6e29ff] cursor-pointer ${activeItem === to ? 'bg-[#6e29ff]' : ''}`}>
-                                <span className="mr-4">{icon}</span>
-                                <span className={`${isOpenForSideBar ? 'block' : 'hidden'} ${name === 'Logout' ? 'text-red-500' : 'text-white'} font-semibold text-md`}>{name}</span>
-                            </Link>
+                    {navLinks.map(({ to, name, icon, onClick }) => (
+                        <div key={name} className="flex items-center">
+                            {onClick ? (
+                                <a
+                                    href={to}
+                                    onClick={onClick}
+                                    className={`flex items-center w-full px-6 py-2 hover:bg-[#6e29ff] cursor-pointer ${activeItem === to ? 'bg-[#6e29ff]' : ''}`}
+                                >
+                                    <span className="mr-4">{icon}</span>
+                                    <span className={`${isOpenForSideBar ? 'block' : 'hidden'} ${name === 'Logout' ? 'text-red-500' : 'text-white'} font-semibold text-md`}>{name}</span>
+                                </a>
+                            ) : (
+                                <Link
+                                    to={to}
+                                    onClick={() => setActiveItem(to)}
+                                    className={`flex items-center w-full px-6 py-2 hover:bg-[#6e29ff] cursor-pointer ${activeItem === to ? 'bg-[#6e29ff]' : ''}`}
+                                >
+                                    <span className="mr-4">{icon}</span>
+                                    <span className={`${isOpenForSideBar ? 'block' : 'hidden'} ${name === 'Logout' ? 'text-red-500' : 'text-white'} font-semibold text-md`}>{name}</span>
+                                </Link>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -120,7 +170,7 @@ const Sidebar = () => {
                             loading="lazy"
                         />
                         <div className="ml-3">
-                            <p className="text-sm font-medium text-white">Student Name</p>
+                            <p className="text-sm font-medium text-white">Student</p>
                             <p className="text-xs text-white">student@uni.edu</p>
                         </div>
                     </Link>

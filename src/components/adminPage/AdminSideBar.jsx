@@ -82,8 +82,8 @@ function AdminSideBar({ setIsSidebarOpen }) {
             icon: <SchoolIcon />,
         },
         {
-            to: '/adminportal/courses',
-            name: 'Courses',
+            to: '/adminportal/coursesmaterial',
+            name: 'Courses Material',
             icon: <BookIcon />,
         },
         {

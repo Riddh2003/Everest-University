@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import StudentsForm from './StudentsForm';
 import axios from "axios";
+import { Flip, toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Simple icon components since we don't have Heroicons
 const PlusIcon = () => <span className="inline-block w-5 h-5 text-center font-bold">+</span>;
@@ -82,24 +84,35 @@ const Student = () => {
         return;
       }
 
-      // If connected to real backend:
-      // await axios.delete(`http://localhost:9999/api/private/student/delete/${studentToDelete.id}`, {
-      //   headers: {
-      //     Authorization: `Bearer ${token}`,
-      //     "Content-Type": "application/json"
-      //   },
-      //   withCredentials: true
-      // });
+      // Call the delete API endpoint
+      const response = await axios.post(
+        "http://localhost:9999/api/private/student/deletestudent",
+        { enrollmentId: studentToDelete.enrollmentId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          withCredentials: true
+        }
+      );
 
-      // For now, just remove from local state
-      const updatedStudents = [...students];
-      const studentIndex = students.findIndex(s => s.enrollmentId === studentToDelete.enrollmentId);
-      updatedStudents.splice(studentIndex, 1);
-      setStudents(updatedStudents);
-      filterStudents(updatedStudents, searchTerm);
-      closeDeleteConfirm();
+      if (response.data.success) {
+        // Show success toast
+        toast.success("Student deleted successfully");
+
+        // Update the UI by removing the deleted student
+        const updatedStudents = students.filter(s => s.enrollmentId !== studentToDelete.enrollmentId);
+        setStudents(updatedStudents);
+        setFilteredStudents(filteredStudents.filter(s => s.enrollmentId !== studentToDelete.enrollmentId));
+        closeDeleteConfirm();
+      } else {
+        // Show error toast
+        toast.error(response.data.message || "Failed to delete student");
+      }
     } catch (error) {
       console.error("Error deleting student:", error);
+      toast.error(error.response?.data?.message || "Error deleting student. Please try again.");
     }
   };
 
@@ -173,21 +186,12 @@ const Student = () => {
 
   return (
     <div className="container mx-auto px-4 py-4">
+      <ToastContainer position="top-center" autoClose={3000} transition={Flip} />
       {/* Page Title and Add Button */}
       <div className="flex justify-between items-center mb-6 flex-wrap">
         <h1 className="text-2xl md:text-3xl font-bold text-indigo-800 border-l-4 border-indigo-600 pl-3">
           Students
         </h1>
-        <button
-          onClick={() => {
-            setCurrentStudent(null);
-            setIsPopupOpen(true);
-          }}
-          className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md"
-        >
-          <PlusIcon />
-          <span>Add Student</span>
-        </button>
       </div>
 
       {/* Search Bar */}

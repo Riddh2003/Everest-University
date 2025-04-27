@@ -12,7 +12,7 @@ const Quick = () => {
             <div className="grid items-center justify-center gap-6 mt-10 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 text-white">
                 <Link to="/studentportal"><Tab heading="Student Portal"
                     ic={<IoBookOutline className="p-3 text-6xl text-center bg-white text-[#5CB338] rounded-3xl"></IoBookOutline>}></Tab></Link>
-                <Link to="/admission"><Tab heading="Admissions"
+                <Link to="/admissionpage"><Tab heading="Admissions"
                     ic={<FaUniversity className="p-3 text-6xl text-center bg-white text-[#5CB338] rounded-3xl"></FaUniversity>}></Tab></Link>
                 <a href="#Courses">
 

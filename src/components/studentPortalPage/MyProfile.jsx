@@ -49,12 +49,12 @@ const MyProfile = () => {
                 return;
             }
 
-            const response = await axios.get(`/api/private/student/getstudentprofile?enrollmentId=${enrollmentId}`, {
+            const response = await axios.get(`http://localhost:9999/api/private/student/getstudentprofile?enrollmentId=${enrollmentId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
-
+            console.log(response.data);
             if (response.data.success) {
                 setStudentProfile(response.data.data);
                 console.log("Student profile data:", response.data.data);
