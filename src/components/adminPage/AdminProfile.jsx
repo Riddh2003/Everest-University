@@ -33,7 +33,7 @@ const AdminProfile = () => {
                 // Explicitly include the token in the request headers and set withCredentials to true
                 console.log("Making API request with token:", token.substring(0, 15) + "...");
 
-                const response = await axios.get(`http://localhost:9999/api/private/admin/getadminbyemail?email=${email}`, {
+                const response = await axios.get(`/api/private/admin/getadminbyemail?email=${email}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'

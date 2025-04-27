@@ -28,7 +28,7 @@ function AdminSideBar({ setIsSidebarOpen }) {
             const email = localStorage.getItem('email');
             if (!token || !email) return;
 
-            const response = await axios.get(`http://localhost:9999/api/private/admin/getadminbyemail?email=${email}`, {
+            const response = await axios.get(`/api/private/admin/getadminbyemail?email=${email}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'

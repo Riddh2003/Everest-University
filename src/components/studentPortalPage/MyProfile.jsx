@@ -3,10 +3,12 @@ import { Card, CardContent, Button, Typography } from "@mui/material";
 import { Mail, Phone, Person, CalendarToday, School, Business } from "@mui/icons-material";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const MyProfile = () => {
     const [studentProfile, setStudentProfile] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchStudentProfile();
@@ -14,15 +16,40 @@ const MyProfile = () => {
 
     const fetchStudentProfile = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const enrollmentId = localStorage.getItem('enrollmentId');
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const enrollmentId = localStorage.getItem('enrollmentId') || sessionStorage.getItem('enrollmentId');
+            const tokenExpiry = localStorage.getItem('tokenExpiry') || sessionStorage.getItem('tokenExpiry');
 
-            if (!token || !enrollmentId) {
+            // Check if token exists and is not expired
+            if (!token) {
                 toast.error("Please login first");
+                navigate('/studentlogin');
                 return;
             }
 
-            const response = await axios.get(`http://localhost:9999/api/private/student/getstudentprofile?enrollmentId=${enrollmentId}`, {
+            // Check if token is expired
+            if (tokenExpiry && new Date(tokenExpiry) <= new Date()) {
+                toast.error("Your session has expired. Please login again.");
+                // Clear any expired tokens
+                localStorage.removeItem('token');
+                sessionStorage.removeItem('token');
+                localStorage.removeItem('tokenExpiry');
+                sessionStorage.removeItem('tokenExpiry');
+                localStorage.removeItem('role');
+                sessionStorage.removeItem('role');
+                localStorage.removeItem('enrollmentId');
+                sessionStorage.removeItem('enrollmentId');
+                navigate('/studentlogin');
+                return;
+            }
+
+            if (!enrollmentId) {
+                toast.error("Enrollment ID not found. Please login again.");
+                navigate('/studentlogin');
+                return;
+            }
+
+            const response = await axios.get(`/api/private/student/getstudentprofile?enrollmentId=${enrollmentId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -36,7 +63,23 @@ const MyProfile = () => {
             }
         } catch (error) {
             console.error("Error fetching student profile:", error);
-            toast.error("Error loading profile data");
+
+            // Check if error is due to unauthorized (401)
+            if (error.response && error.response.status === 401) {
+                toast.error("Your session has expired. Please login again.");
+                // Clear any expired tokens
+                localStorage.removeItem('token');
+                sessionStorage.removeItem('token');
+                localStorage.removeItem('tokenExpiry');
+                sessionStorage.removeItem('tokenExpiry');
+                localStorage.removeItem('role');
+                sessionStorage.removeItem('role');
+                localStorage.removeItem('enrollmentId');
+                sessionStorage.removeItem('enrollmentId');
+                navigate('/studentlogin');
+            } else {
+                toast.error("Error loading profile data");
+            }
         } finally {
             setLoading(false);
         }
@@ -119,7 +162,7 @@ const MyProfile = () => {
                     {/* Payment Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                         <Card className="p-4 bg-gradient-to-r from-[#4500e2] to-[#6e29ff] text-white rounded-lg shadow-md">
-                            <Typography variant="h6">TUITION FEES</Typography>
+                            <Typography variant="h6">TOTAL FEES</Typography>
                             <Typography variant="h5">₹ {studentProfile?.fees?.[0]?.total_fees || studentProfile?.student?.fees?.[0]?.total_fees || '0'}</Typography>
                         </Card>
                         <Card className="p-4 bg-gradient-to-r from-[#6e29ff] to-[#9747FF] text-white rounded-lg shadow-md">

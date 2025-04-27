@@ -20,6 +20,7 @@ const ProfessorsForm = ({ facultyData, onClose }) => {
       address: '',
       phoneNumber: '',
       gender: '',
+      profilePicture: 'https://avatar.iran.liara.run/public' // Match the FacultyDto property name
     }
   });
 
@@ -66,47 +67,28 @@ const ProfessorsForm = ({ facultyData, onClose }) => {
         return;
       }
 
-      console.log('Submitting data:', data);
+      // Map form field names to match backend expected property names
+      const submissionData = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        role: data.role,
+        qualification: data.qualification,
+        status: data.status,
+        department: data.department,
+        gender: data.gender,
+        phoneNumber: data.phoneNumber,
+        address: data.address,
+        profilePicture: 'https://avatar.iran.liara.run/public' // Match the FacultyDto property name
+      };
 
-      // If we have a profile picture, use the multipart endpoint
-      if (profilePicture) {
-        const formData = new FormData();
+      console.log('Submitting faculty data:', submissionData);
 
-        // Add faculty data as JSON
-        const facultyBlob = new Blob([JSON.stringify(data)], {
-          type: 'application/json'
-        });
-
-        formData.append('faculty', facultyBlob);
-        formData.append('profilePicture', profilePicture);
-
-        const response = await axios.post(
-          'http://localhost:9999/api/private/profile/addfaculty-with-profile',
-          formData,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'multipart/form-data'
-            }
-          }
-        );
-
-        console.log('Response:', response);
-
-        if (response.data.success) {
-          toast.success('Faculty added successfully');
-          onClose();
-          // Refresh the page to show updated data
-          window.location.reload();
-        } else {
-          // Handle case where API returns success: false
-          throw new Error(response.data.message || 'Operation failed');
-        }
-      } else {
-        // Use the regular endpoint without profile picture
+      try {
+        // Use the regular endpoint
         const response = await axios.post(
           'http://localhost:9999/api/private/profile/addfaculty',
-          data,
+          submissionData,
           {
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -115,23 +97,38 @@ const ProfessorsForm = ({ facultyData, onClose }) => {
           }
         );
 
-        console.log('Response:', response);
+        console.log('Response from addfaculty:', response);
 
-        if (response.data.success) {
+        if (response.data && response.data.success) {
           toast.success('Faculty added successfully');
           onClose();
           // Refresh the page to show updated data
           window.location.reload();
-        } else {
+        } else if (response.data) {
           // Handle case where API returns success: false
           throw new Error(response.data.message || 'Operation failed');
+        } else {
+          throw new Error('Invalid response from server');
         }
+      } catch (apiError) {
+        console.error('Error submitting faculty data:', apiError);
+
+        // Check if it's a network error
+        if (apiError.message === 'Network Error') {
+          toast.error('Network error. Please check your connection and server status.');
+        } else if (apiError.response && apiError.response.status === 500) {
+          toast.error('Server error. There might be a syntax error on the backend.');
+        } else {
+          toast.error(`Error adding faculty: ${apiError.message || 'Unknown error'}`);
+        }
+        throw apiError;
       }
     } catch (error) {
       console.error('Error details:', error);
       if (error.response) {
         console.error('Response data:', error.response.data);
         console.error('Response status:', error.response.status);
+        console.error('Response headers:', error.response.headers);
         toast.error(error.response.data?.message || `Server error: ${error.response.status}`);
       } else if (error.request) {
         console.error('Request made but no response received:', error.request);
@@ -156,31 +153,6 @@ const ProfessorsForm = ({ facultyData, onClose }) => {
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Profile Picture */}
-            <div className="md:col-span-2 flex flex-col items-center">
-              <div className="w-32 h-32 rounded-full bg-gray-200 overflow-hidden mb-2">
-                {previewUrl ? (
-                  <img
-                    src={previewUrl}
-                    alt="Profile preview"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-[#621df6] text-white text-4xl">
-                    👤
-                  </div>
-                )}
-              </div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Profile Picture
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleProfilePictureChange}
-                className="text-sm"
-              />
-            </div>
 
             {/* Name */}
             <div>

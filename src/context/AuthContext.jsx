@@ -15,43 +15,72 @@ export const AuthProvider = ({ children }) => {
             try {
                 const token = localStorage.getItem('token') || sessionStorage.getItem('token');
                 const role = localStorage.getItem('role') || sessionStorage.getItem('role');
+                const enrollmentId = localStorage.getItem('enrollmentId') || sessionStorage.getItem('enrollmentId');
+                const tokenExpiry = localStorage.getItem('tokenExpiry') || sessionStorage.getItem('tokenExpiry');
 
-                if (token) {
+                // Check if token exists and is still valid (not expired)
+                if (token && tokenExpiry && new Date(tokenExpiry) > new Date()) {
                     try {
-                        // Verify token by getting user profile
-                        const response = await axios.get(`http://localhost:9999/api/private/profile/getstudent?enrollmentId=${enrollmentId}`, {
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`
-                            }
-                        });
-
-                        if (response.status === 200) {
-                            setUser({
-                                ...response.data,
-                                role
+                        // For student role, verify token by getting student profile
+                        if (role === 'student' && enrollmentId) {
+                            const response = await axios.get(`/api/private/student/getstudent?enrollmentId=${enrollmentId}`, {
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                }
                             });
-                        } else {
-                            // Token is invalid, clear it
-                            localStorage.removeItem('token');
-                            sessionStorage.removeItem('token');
-                            localStorage.removeItem('role');
-                            sessionStorage.removeItem('role');
+
+                            if (response.status === 200) {
+                                setUser({
+                                    ...response.data,
+                                    role
+                                });
+                            } else {
+                                // Token is invalid, clear it
+                                clearAuthData();
+                            }
+                        } else if (role === 'admin') {
+                            // For admin role, verify token by another endpoint or just trust the token
+                            const email = localStorage.getItem('email') || sessionStorage.getItem('email');
+                            if (email) {
+                                setUser({
+                                    email,
+                                    role
+                                });
+                            } else {
+                                // Missing required data, logout
+                                clearAuthData();
+                            }
                         }
                     } catch (err) {
                         console.error('Error verifying token:', err);
                         // In case of error, clear the token
-                        localStorage.removeItem('token');
-                        sessionStorage.removeItem('token');
-                        localStorage.removeItem('role');
-                        sessionStorage.removeItem('role');
+                        clearAuthData();
                     }
+                } else if (token && tokenExpiry && new Date(tokenExpiry) <= new Date()) {
+                    // Token is expired, clear it
+                    console.log("Token expired, clearing auth data");
+                    clearAuthData();
                 }
             } catch (err) {
                 setError(err.message);
             } finally {
                 setLoading(false);
             }
+        };
+
+        // Helper function to clear all auth data
+        const clearAuthData = () => {
+            localStorage.removeItem('token');
+            sessionStorage.removeItem('token');
+            localStorage.removeItem('role');
+            sessionStorage.removeItem('role');
+            localStorage.removeItem('email');
+            sessionStorage.removeItem('email');
+            localStorage.removeItem('enrollmentId');
+            sessionStorage.removeItem('enrollmentId');
+            localStorage.removeItem('tokenExpiry');
+            sessionStorage.removeItem('tokenExpiry');
         };
 
         checkAuth();
@@ -64,7 +93,7 @@ export const AuthProvider = ({ children }) => {
             console.log("[AUTH] Attempting student login for:", enrollmentId);
 
             // Send the data directly, not nested in a userData object
-            const response = await axios.post('http://localhost:9999/api/public/auth/studentlogin', {
+            const response = await axios.post('/api/public/auth/studentlogin', {
                 enrollmentId,
                 password
             });
@@ -72,16 +101,29 @@ export const AuthProvider = ({ children }) => {
 
             if (response.status === 200 && response.data.success) {
                 const token = response.data.token;
+
+                // Calculate expiry time (24 hours from now)
+                const expiryTime = new Date();
+                expiryTime.setHours(expiryTime.getHours() + 24);
+
+                // Set default authorization header
+                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+                // Store token and its expiration time
                 localStorage.setItem('token', token);
                 localStorage.setItem('role', 'student');
+                localStorage.setItem('enrollmentId', enrollmentId);
+                localStorage.setItem('tokenExpiry', expiryTime.toISOString());
+
                 sessionStorage.setItem('token', token);
                 sessionStorage.setItem('role', 'student');
                 sessionStorage.setItem('enrollmentId', enrollmentId);
+                sessionStorage.setItem('tokenExpiry', expiryTime.toISOString());
 
                 // Get user profile - fix the API call
                 console.log('token : ', token);
                 try {
-                    const studentResponse = await axios.get(`http://localhost:9999/api/private/student/getstudent?enrollmentId=${enrollmentId}`, {
+                    const studentResponse = await axios.get(`/api/private/student/getstudent?enrollmentId=${enrollmentId}`, {
                         headers: {
                             'Authorization': `Bearer ${token}`
                         },
@@ -139,12 +181,14 @@ export const AuthProvider = ({ children }) => {
             localStorage.removeItem('token');
             localStorage.removeItem('role');
             localStorage.removeItem('email');
+            localStorage.removeItem('tokenExpiry');
             sessionStorage.removeItem('token');
             sessionStorage.removeItem('role');
             sessionStorage.removeItem('email');
+            sessionStorage.removeItem('tokenExpiry');
             delete axios.defaults.headers.common['Authorization'];
 
-            const response = await axios.post('http://localhost:9999/api/public/auth/adminlogin',
+            const response = await axios.post('/api/public/auth/adminlogin',
                 { email, password },
                 {
                     headers: {
@@ -159,16 +203,22 @@ export const AuthProvider = ({ children }) => {
                 const { token, role } = response.data;
                 console.log("[AUTH] Admin login successful. Role:", role);
 
+                // Calculate expiry time (24 hours from now)
+                const expiryTime = new Date();
+                expiryTime.setHours(expiryTime.getHours() + 24);
+
                 // Store authentication data in both localStorage and sessionStorage
                 // Local Storage (persistent)
                 localStorage.setItem('token', token);
                 localStorage.setItem('role', role || 'admin');
                 localStorage.setItem('email', email);
+                localStorage.setItem('tokenExpiry', expiryTime.toISOString());
 
                 // Session Storage (for the current session)
                 sessionStorage.setItem('token', token);
                 sessionStorage.setItem('role', role || 'admin');
                 sessionStorage.setItem('email', email);
+                sessionStorage.setItem('tokenExpiry', expiryTime.toISOString());
 
                 // Set default authorization header for all future requests
                 axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -231,48 +281,29 @@ export const AuthProvider = ({ children }) => {
     // Logout function
     const logout = async () => {
         try {
-            console.log("[AUTH] Logging out user");
+            setLoading(true);
 
-            // Clear auth data from both localStorage and sessionStorage
+            // Clean up all authentication data
             localStorage.removeItem('token');
-            localStorage.removeItem('role');
-            localStorage.removeItem('email');
             sessionStorage.removeItem('token');
+            localStorage.removeItem('role');
             sessionStorage.removeItem('role');
+            localStorage.removeItem('email');
             sessionStorage.removeItem('email');
+            localStorage.removeItem('enrollmentId');
+            sessionStorage.removeItem('enrollmentId');
+            localStorage.removeItem('tokenExpiry');
+            sessionStorage.removeItem('tokenExpiry');
 
-            // Reset axios default headers
             delete axios.defaults.headers.common['Authorization'];
 
-            // Clear user state
             setUser(null);
-
-            // Only try to call logout endpoint if we were previously logged in
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            if (token) {
-                try {
-                    await axios.post('http://localhost:9999/api/public/auth/logout', null, {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        // Don't throw error on non-200 responses for logout
-                        validateStatus: function (status) {
-                            return status < 500; // Accept any status code less than 500
-                        }
-                    });
-                    console.log("[AUTH] Server logout successful");
-                } catch (logoutErr) {
-                    // Just log the error but don't prevent logout on frontend
-                    console.error('[AUTH] Error during server logout:', logoutErr);
-                }
-            }
-
-            console.log("[AUTH] Logout completed successfully");
-            return { success: true, message: 'Logged out successfully' };
+            return { success: true };
         } catch (err) {
-            console.error('[AUTH] Error during logout:', err);
-            return { success: false, message: 'Error during logout' };
+            console.error("[AUTH] Logout error:", err);
+            return { success: false, message: err.message };
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -280,7 +311,7 @@ export const AuthProvider = ({ children }) => {
     const register = async (userData) => {
         try {
             setLoading(true);
-            const response = await axios.post('http://localhost:9999/api/public/auth/register', userData, {
+            const response = await axios.post('/api/public/auth/register', userData, {
                 headers: {
                     'Content-Type': 'application/json'
                 }

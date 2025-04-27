@@ -14,8 +14,8 @@ const StudentLogin = () => {
   const [email, setEmail] = useState("");
   const { studentLogin } = useAuth();
 
-  const SEND_OTP_URL = "http://localhost:9999/api/public/auth/sendotp";
-  const FORGOT_PASSWORD_URL = "http://localhost:9999/api/public/auth/forgotpassword";
+  const SEND_OTP_URL = "/api/public/auth/sendotp";
+  const FORGOT_PASSWORD_URL = "/api/public/auth/forgotpassword";
 
   const {
     register,
@@ -36,22 +36,15 @@ const StudentLogin = () => {
   } = useForm();
 
   // In the onSubmit function, update the navigation logic
-  
+
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const response =  await studentLogin(data.enrollmentId, data.password);
-      console.log("Login result:",response);
-      const result = response;
-      
-      if (result.success) {
-        // Store the token in localStorage
-        localStorage.setItem('token', result.token);
-        localStorage.setItem('role', result.role);
-        
-        // Call the context method to update auth state
-        
-        toast.success(result.message || "Login successful", {
+      const response = await studentLogin(data.enrollmentId, data.password);
+      console.log("Login result:", response);
+
+      if (response.success) {
+        toast.success(response.message || "Login successful", {
           position: "top-center",
           autoClose: 3000,
           hideProgressBar: false,
@@ -62,13 +55,13 @@ const StudentLogin = () => {
           theme: "light",
           transition: Flip,
         });
-  
+
         // Add a slight delay before navigation to allow the toast to be visible
         setTimeout(() => {
           navigate("/studentportal");
         }, 1000);
       } else {
-        toast.error(result.message || "Login failed", {
+        toast.error(response.message || "Login failed", {
           position: "top-center",
           autoClose: 3000,
           hideProgressBar: false,
@@ -99,14 +92,14 @@ const StudentLogin = () => {
         enrollmentId: data.enrollmentId,
         email: data.email
       });
-      
+
       const result = response.data;
-      
+
       if (result.success) {
         setEmail(data.email);
         setShowOtpForm(true);
         setShowForgotPassword(false);
-        
+
         toast.success("OTP sent to your email", {
           position: "top-center",
           autoClose: 3000,
@@ -138,13 +131,13 @@ const StudentLogin = () => {
         otp: data.otp,
         password: data.newPassword
       });
-      
+
       const result = response.data;
-      
+
       if (result.success) {
         setShowOtpForm(false);
         setShowForgotPassword(false);
-        
+
         toast.success("Password reset successful. Please login with your new password.", {
           position: "top-center",
           autoClose: 3000,
@@ -169,9 +162,9 @@ const StudentLogin = () => {
 
   return (
     // Update the main container div style
-    <div 
-      className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-900/70 to-indigo-900/70 bg-cover bg-center" 
-      style={{ 
+    <div
+      className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-900/70 to-indigo-900/70 bg-cover bg-center"
+      style={{
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
@@ -186,7 +179,7 @@ const StudentLogin = () => {
           </h2>
           <p className="text-center mt-1">Access your academic information</p>
         </div>
-    
+
         {/* Update form labels and inputs */}
         {!showForgotPassword && !showOtpForm && (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -205,7 +198,7 @@ const StudentLogin = () => {
                 <p className="mt-1 text-sm text-red-200">{errors.enrollmentId.message}</p>
               )}
             </div>
-    
+
             <div>
               <label htmlFor="password" className="block text-sm font-semibold text-[#466845]">
                 Password
@@ -221,7 +214,7 @@ const StudentLogin = () => {
                 <p className="mt-1 text-sm text-red-200">{errors.password.message}</p>
               )}
             </div>
-    
+
             <div>
               <button
                 type="submit"
@@ -239,7 +232,7 @@ const StudentLogin = () => {
                 ) : "Sign In"}
               </button>
             </div>
-    
+
             <div className="text-center">
               <button
                 type="button"
@@ -251,7 +244,7 @@ const StudentLogin = () => {
             </div>
           </form>
         )}
-    
+
         {/* Apply similar styling to forgot password and OTP forms */}
         {/* Update the className attributes for labels and inputs in these forms with the same styling */}
       </div>

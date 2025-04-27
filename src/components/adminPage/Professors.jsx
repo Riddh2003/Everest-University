@@ -161,17 +161,15 @@ function Professors() {
           <div className="p-6">
             <div className="flex flex-col md:flex-row gap-8">
               <div className="w-full md:w-1/3 flex flex-col items-center">
-                {selectedFaculty.profilePicture ? (
-                  <img
-                    src={selectedFaculty.profilePicture}
-                    alt={selectedFaculty.name}
-                    className="w-48 h-48 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-48 h-48 rounded-full bg-[#621df6] text-white flex items-center justify-center text-7xl">
-                    {selectedFaculty.gender === 'Male' ? '👨‍🏫' : selectedFaculty.gender === 'Female' ? '👩‍🏫' : '🧑‍🏫'}
-                  </div>
-                )}
+                <div className="h-24 w-24 rounded-full bg-[#621df6] text-white flex items-center justify-center text-4xl">
+                  {selectedFaculty.gender === 'Male' ? (
+                    <span className="text-4xl">👨‍🏫</span>
+                  ) : selectedFaculty.gender === 'Female' ? (
+                    <span className="text-4xl">👩‍🏫</span>
+                  ) : (
+                    <span className="text-4xl">👤</span>
+                  )}
+                </div>
                 <h2 className="mt-4 text-2xl font-bold">{selectedFaculty.name}</h2>
                 <p className="text-[#621df6] font-medium">{selectedFaculty.role}</p>
                 <div className="mt-2">
@@ -269,11 +267,11 @@ function Professors() {
                 </div>
 
                 <button
-                  className="flex items-center gap-1 px-4 py-2 bg-[#621df6] text-white rounded-md hover:bg-[#5019d0] transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#621df6] text-white rounded-md hover:bg-[#5019d0] transition-colors shadow-md"
                   onClick={() => openPopup()}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                   </svg>
                   Add Faculty
                 </button>
@@ -324,17 +322,11 @@ function Professors() {
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
-                        {faculty.profilePicture ? (
-                          <img
-                            src={faculty.profilePicture}
-                            alt={faculty.name}
-                            className="h-10 w-10 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded-full bg-[#621df6] text-white flex items-center justify-center text-xl">
-                            {faculty.gender === 'Male' ? '👨‍🏫' : faculty.gender === 'Female' ? '👩‍🏫' : '🧑‍🏫'}
-                          </div>
-                        )}
+
+                        <div className="h-10 w-10 rounded-full bg-[#621df6] text-white flex items-center justify-center text-xl">
+                          {faculty.gender === 'Male' ? '👨‍🏫' : faculty.gender === 'Female' ? '👩‍🏫' : '🧑‍🏫'}
+                        </div>
+
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">{faculty.name}</div>
